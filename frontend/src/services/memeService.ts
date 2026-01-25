@@ -37,7 +37,7 @@ class MemeService {
     }
 
     // 🔄 Dynamic URL selection based on context
-    // - Client-side: Uses public URL from NEXT_PUBLIC_API_URL
+    // - Client-side: Uses public URL from NEXT_PUBLIC_BACKEND_URL
     // - Server-side: Uses internal URL from API_INTERNAL_URL (private networking)
     const apiUrl = getApiUrl();
 

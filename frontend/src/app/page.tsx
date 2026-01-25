@@ -92,13 +92,13 @@ export default function Home() {
 
     // 🚨 SUPER SIMPLE DEBUG - Will definitely show up
     console.log("🚨 StalkGen Debug Start");
-    console.log("🚨 NEXT_PUBLIC_API_URL:", process.env.NEXT_PUBLIC_API_URL);
+    console.log("🚨 NEXT_PUBLIC_BACKEND_URL:", process.env.NEXT_PUBLIC_BACKEND_URL);
 
     // Test API connectivity directly
     const testApiConnection = async () => {
       try {
         const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005";
+          process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3005";
         console.log("🚨 Testing API:", apiUrl);
 
         const response = await fetch(`${apiUrl}/api/health`);
