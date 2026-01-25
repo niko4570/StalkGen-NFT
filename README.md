@@ -4,10 +4,6 @@
 
 StalkGen NFT - AI 梗图生成与 NFT 铸造平台
 
-## 💻 项目 Repo
-
-`https://github.com/niko4570/StalkGen-NFT`
-
 ## 📌 项目简介
 
 StalkGen NFT 是一个基于 Solana 的 AI 梗图生成与 NFT 铸造平台。用户可以通过文字描述生成个性化梗图，并一键将生成的梗图铸造为 NFT 永久保存。
@@ -40,12 +36,17 @@ StalkGen NFT 是一个基于 Solana 的 AI 梗图生成与 NFT 铸造平台。�
 
 ## 🎬 Demo 演示
 
-### 功能截图
+- 首页：AI 梗图生成界面ee
+<img width="1688" height="722" alt="Screenshot 2026-01-25 175054" src="https://github.com/user-attachments/assets/f8bd90fe-7f10-4780-b7ae-6157c340063d" />
 
-- 首页：AI 梗图生成界面
 - 生成结果：展示 AI 生成的梗图
+<img width="1525" height="1075" alt="Screenshot 2026-01-25 175101" src="https://github.com/user-attachments/assets/dc2fef30-b87c-420f-8a13-4eeb3c2f1ebc" />
+
 - NFT 铸造：一键铸造为 Solana NFT
+<img width="2245" height="1271" alt="Screenshot 2026-01-25 175034" src="https://github.com/user-attachments/assets/381f351c-9c62-4f63-be2a-a8bafa11a802" />
+
 - 钱包集成：支持 Phantom、Solflare 等主流钱包
+<img width="591" height="893" alt="Screenshot 2026-01-25 175202" src="https://github.com/user-attachments/assets/a8ffc406-7de5-467d-b851-9b6d1fae6837" />
 
 ## 💡 核心功能
 
@@ -197,20 +198,6 @@ pnpm --filter stalkgen-backend build
 - 定期检查 API 调用限额，避免超出 Volcengine API 的使用限制
 - 开发环境建议使用 Solana Devnet，生产环境使用 Solana Mainnet Beta
 
-## ✍️ 项目创作者
-
-### 创作者昵称
-
-Karly
-
-### 创作者联系方式
-
-- GitHub: https://github.com/niko4570
-- Twitter: @niko1370549
-
-### 创作者 Solana USDC 钱包地址
-
-Hp7b8rDM3nxxBUjaN49JWZaw1rgPrrWEZeMpi2TShN8b
 
 ## 许可证
 
