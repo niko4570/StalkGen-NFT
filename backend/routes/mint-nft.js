@@ -15,21 +15,28 @@
  * }
  */
 
-import { Connection, Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
-import { Metaplex, keypairIdentity } from "@metaplex-foundation/js";
+import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
+import { mplTokenMetadata } from "@metaplex-foundation/mpl-token-metadata";
+import { irysUploader } from "@metaplex-foundation/umi-uploader-irys";
+import {
+  generateSigner,
+  percentAmount,
+  signerIdentity,
+  sol,
+} from "@metaplex-foundation/umi";
+import { createGenericFile } from "@metaplex-foundation/umi";
+import { createNft } from "@metaplex-foundation/mpl-token-metadata";
 import bs58 from "bs58";
 
 /**
  * Mint an NFT from a generated meme
  *
  * This function handles the complete NFT minting process:
- * 1. Sets up Solana connection
+ * 1. Sets up Solana connection with Umi
  * 2. Creates or uses existing keypair
- * 3. Initializes Metaplex SDK
- * 4. Creates NFT metadata
- * 5. Uploads metadata to Arweave
- * 6. Mints the NFT on Solana
- * 7. Returns transaction details
+ * 3. Uploads metadata to Arweave using Irys
+ * 4. Mints the NFT on Solana using mpl-token-metadata
+ * 5. Returns transaction details
  *
  * @param {Object} req - Express request object
  * @param {Object} req.body - Request body
@@ -49,37 +56,42 @@ export async function mintNFT(req, res) {
         .json({ error: "Image URL and prompt are required" });
     }
 
-    // Create description from prompt
-    const description = `Meme generated from prompt: ${prompt}`;
-
-    // 1. Set up Solana connection, supporting both NEXT_PUBLIC_ and PUBLIC_ prefixes
+    // 1. Set up Umi instance with Irys uploader
     const rpcUrl =
-      process.env.NEXT_PUBLIC_SOLANA_RPC_URL ||
-      process.env.PUBLIC_SOLANA_RPC_URL ||
-      "https://api.devnet.solana.com";
-    const connection = new Connection(rpcUrl, "confirmed");
+      process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "https://api.devnet.solana.com";
+    const irysUrl =
+      process.env.NEXT_PUBLIC_IRYS_URL || "https://devnet.irys.xyz";
+
+    console.log(`Setting up Umi with RPC URL: ${rpcUrl}`);
+    console.log(`Setting up Irys uploader with URL: ${irysUrl}`);
+
+    const umi = createUmi(rpcUrl)
+      .use(mplTokenMetadata())
+      .use(
+        irysUploader({
+          address: irysUrl,
+          network: "devnet",
+          // Use free devnet, no need to fund
+          fundAmount: 0,
+        }),
+      );
 
     // 2. Create or use existing keypair
     let keypair;
     if (process.env.SECRET_KEY) {
       // Use existing secret key from environment
       const secretKey = bs58.decode(process.env.SECRET_KEY);
-      keypair = Keypair.fromSecretKey(secretKey);
+      keypair = umi.eddsa.createKeypairFromSecretKey(secretKey);
     } else {
       // Generate new keypair for testing
-      keypair = Keypair.generate();
-      console.log(
-        "Generated new keypair for testing:",
-        keypair.publicKey.toBase58(),
-      );
+      keypair = generateSigner(umi);
+      console.log("Generated new keypair for testing:", keypair.publicKey);
 
       // Request small amount of SOL for testing keypair
       try {
-        const airdropSignature = await connection.requestAirdrop(
-          keypair.publicKey,
-          LAMPORTS_PER_SOL * 0.1,
-        );
-        await connection.confirmTransaction(airdropSignature);
+        const signature = await umi.rpc.airdrop(keypair.publicKey, sol(0.1));
+        // Wait for airdrop to confirm
+        await umi.rpc.confirmTransaction(signature);
         console.log("Airdrop successful");
       } catch (airdropError) {
         console.warn(
@@ -89,16 +101,16 @@ export async function mintNFT(req, res) {
       }
     }
 
-    // 3. Initialize Metaplex SDK with correct identity setup
-    const metaplex = Metaplex.make(connection).use(keypairIdentity(keypair));
+    // Set the keypair as the identity and payer
+    umi.use(signerIdentity(keypair));
 
-    // 4. Create NFT metadata
+    // 3. Create NFT metadata
     const timestamp = Math.floor(Date.now() / 1000);
     const shortPrompt =
       prompt.length > 20 ? prompt.substring(0, 20) + "..." : prompt;
     const metadata = {
       name: `Meme: ${shortPrompt}`,
-      description: description,
+      description: `Meme generated from prompt: ${prompt}`,
       image: imageUrl,
       attributes: [
         {
@@ -114,29 +126,8 @@ export async function mintNFT(req, res) {
           value: prompt,
         },
       ],
-      external_url: "https://stalkgen.xyz",
+      external_url: "https://github.com/solana-labs/solana",
       seller_fee_basis_points: 500, // 5%
-      creators: [
-        {
-          address: keypair.publicKey.toBase58(),
-          verified: true,
-          share: 100,
-        },
-      ],
-    };
-
-    // 5. Upload metadata to Arweave
-    console.log("Uploading metadata to Arweave...");
-    const { uri } = await metaplex.nfts().uploadMetadata(metadata);
-    console.log("Metadata uploaded to:", uri);
-
-    // 6. Mint NFT
-    console.log("Minting NFT...");
-    const { nft, response } = await metaplex.nfts().create({
-      uri: uri,
-      name: `Meme: ${shortPrompt}`,
-      symbol: "MEME",
-      sellerFeeBasisPoints: 500, // 5%
       creators: [
         {
           address: keypair.publicKey,
@@ -144,11 +135,36 @@ export async function mintNFT(req, res) {
           share: 100,
         },
       ],
-    });
+    };
+
+    // 4. Upload metadata to Arweave using Irys
+    console.log("Uploading metadata to Arweave...");
+    const metadataUri = await umi.uploader.uploadJson(metadata);
+    console.log("Metadata uploaded to:", metadataUri);
+
+    // 5. Generate mint signer
+    const mint = generateSigner(umi);
+
+    // 6. Mint NFT using mpl-token-metadata
+    console.log("Minting NFT...");
+    const transaction = await createNft(umi, {
+      mint,
+      name: `Meme: ${shortPrompt}`,
+      symbol: "MEME",
+      uri: metadataUri,
+      sellerFeeBasisPoints: percentAmount(500), // 5%
+      creators: [
+        {
+          address: keypair.publicKey,
+          verified: true,
+          share: 100,
+        },
+      ],
+    }).sendAndConfirm(umi);
 
     // 7. Build Solana Explorer links
-    const transactionSignature = response.signature;
-    const mintAddress = nft.address.toBase58();
+    const transactionSignature = transaction.signature;
+    const mintAddress = mint.publicKey;
     const cluster = rpcUrl.includes("devnet") ? "devnet" : "mainnet";
     const transactionUrl = `https://solscan.io/tx/${transactionSignature}?cluster=${cluster}`;
     const mintUrl = `https://solscan.io/token/${mintAddress}?cluster=${cluster}`;

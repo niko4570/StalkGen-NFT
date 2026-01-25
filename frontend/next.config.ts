@@ -1,12 +1,12 @@
 import type { NextConfig } from 'next'
-import path from 'path'
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   images: {
     domains: ['replicate.delivery'],
   },
-  outputFileTracingRoot: path.join(process.cwd(), '../..'),
+  // Fix Next.js warning about multiple lockfiles by specifying correct workspace root
+  outputFileTracingRoot: '/home/niko/code/StalkGen-NFT/frontend',
 }
 
 export default nextConfig

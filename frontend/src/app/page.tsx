@@ -1,56 +1,102 @@
 "use client";
 
-import { useState } from "react";
+/**
+ * StalkGen NFT Main Page Component
+ *
+ * Provides a complete user interface for AI meme generation and NFT minting
+ * - Wallet connection and balance display
+ * - AI meme generation
+ * - NFT minting and transaction lookup
+ */
+
+import { useState, useEffect } from "react";
 import { Image, AlertCircle } from "lucide-react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import { Connection, PublicKey } from "@solana/web3.js";
-import { Metaplex, walletAdapterIdentity } from "@metaplex-foundation/js";
-import crypto from "crypto";
+import { memeService } from "../services/memeService";
+import { nftService } from "../services/nftService";
 
+/**
+ * NFT Metadata Interface
+ */
 interface Metadata {
-  imageUrl: string;
-  prompt: string;
+  imageUrl: string; // Image URL
+  prompt: string; // Prompt used to generate the image
 }
 
-// 生成 Seedream API 签名
-function generateSignature(
-  method: string,
-  endpoint: string,
-  sk: string,
-  body: any,
-) {
-  const timestamp = Date.now();
-  const nonce = Math.random().toString(36).substring(2, 15);
-  const bodyString = JSON.stringify(body);
-  const signatureString = `${method}\n${endpoint}\n${timestamp}\n${nonce}\n${bodyString}\n`;
-
-  const hmac = crypto.createHmac("sha256", sk);
-  hmac.update(signatureString, "utf8");
-  return hmac.digest("base64");
-}
-
+/**
+ * StalkGen NFT Main Page Component
+ */
 export default function Home() {
-  const wallet = useWallet();
-  const [prompt, setPrompt] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [mintLoading, setMintLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [nftMinted, setNftMinted] = useState(false);
-  const [nftAddress, setNftAddress] = useState("");
-  const [solscanLink, setSolscanLink] = useState("");
-  const [metadata, setMetadata] = useState<Metadata | null>(null);
+  const wallet = useWallet(); // Solana wallet context
 
-  const connection = new Connection(
-    process.env.NEXT_PUBLIC_SOLANA_RPC_URL ||
-      process.env.PUBLIC_SOLANA_RPC_URL ||
-      "https://api.devnet.solana.com",
-  );
+  // State management
+  const [prompt, setPrompt] = useState(""); // AI generation prompt
+  const [imageUrl, setImageUrl] = useState(""); // Generated image URL
+  const [loading, setLoading] = useState(false); // Meme generation loading state
+  const [mintLoading, setMintLoading] = useState(false); // NFT minting loading state
+  const [error, setError] = useState(""); // Error message
+  const [nftMinted, setNftMinted] = useState(false); // Whether NFT was successfully minted
+  const [nftAddress, setNftAddress] = useState(""); // Minted NFT address
+  const [solscanLink, setSolscanLink] = useState(""); // Solscan transaction lookup link
 
+  // Balance related states
+  const [balance, setBalance] = useState<number>(0); // Wallet SOL balance
+  const [balanceLoading, setBalanceLoading] = useState(false); // Balance loading state
+
+  // Client-side rendering flag to resolve hydration mismatch issues
+  const [isClient, setIsClient] = useState(false);
+
+  /**
+   * Check wallet SOL balance
+   *
+   * @returns {Promise<void>} No return value, updates balance state
+   */
+  const checkBalance = async () => {
+    if (!wallet.publicKey) return;
+
+    setBalanceLoading(true);
+    try {
+      const solBalance = await nftService.checkBalance(wallet.publicKey);
+      setBalance(solBalance);
+      console.log("Wallet balance:", solBalance, "SOL");
+    } catch (err) {
+      console.error("Error checking balance:", err);
+      setError(
+        "Failed to check balance, please ensure network connection is normal",
+      );
+    } finally {
+      setBalanceLoading(false);
+    }
+  };
+
+  /**
+   * Automatically check balance when wallet connection status changes
+   */
+  useEffect(() => {
+    if (wallet.connected && wallet.publicKey) {
+      checkBalance();
+    } else {
+      // Reset balance if wallet is disconnected
+      setBalance(0);
+    }
+  }, [wallet.connected, wallet.publicKey]);
+
+  /**
+   * Mark component as client-side rendered to resolve hydration mismatch issues
+   */
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  /**
+   * Generate meme using AI
+   *
+   * @returns {Promise<void>} No return value, updates image URL state
+   */
   const generateMeme = async () => {
     if (!prompt) {
-      setError("请输入提示词");
+      setError("Please enter a prompt");
       return;
     }
 
@@ -59,115 +105,53 @@ export default function Home() {
     setNftMinted(false);
 
     try {
-      // 使用前端直接调用 Seedream API
-      const ak =
-        process.env.NEXT_PUBLIC_SEEDREAM_API_AK ||
-        process.env.PUBLIC_SEEDREAM_API_AK;
-      const sk =
-        process.env.NEXT_PUBLIC_SEEDREAM_API_SK ||
-        process.env.PUBLIC_SEEDREAM_API_SK;
-
-      // Validate API keys with specific error messages
-      if (!ak) {
-        console.error(
-          "Seedream API Access Key (AK) is missing. Please check your environment variables.",
-        );
-        console.error(
-          "Expected variables: NEXT_PUBLIC_SEEDREAM_API_AK or PUBLIC_SEEDREAM_API_AK",
-        );
-        throw new Error(
-          "缺少 Seedream API Access Key (AK)，请检查环境变量配置",
-        );
-      }
-
-      if (!sk) {
-        console.error(
-          "Seedream API Secret Key (SK) is missing. Please check your environment variables.",
-        );
-        console.error(
-          "Expected variables: NEXT_PUBLIC_SEEDREAM_API_SK or PUBLIC_SEEDREAM_API_SK",
-        );
-        throw new Error(
-          "缺少 Seedream API Secret Key (SK)，请检查环境变量配置",
-        );
-      }
-
-      console.log("Seedream API keys retrieved successfully");
-
-      // 调用 Seedream API
-      const body = {
-        model: "seedream-universal-3.0",
+      // Generate meme using memeService
+      const result = await memeService.generateMeme({
         prompt,
         negative_prompt: "",
-        n: 1,
         size: "1024x1024",
-      };
+      });
 
-      const timestamp = Date.now();
-      const nonce = Math.random().toString(36).substring(2, 15);
-      const endpoint = "/api/v3/text2image";
-
-      const response = await fetch(
-        "https://seedream-api.bytedance.com/api/v3/text2image",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-TOP-Request-Id": crypto.randomUUID(),
-            "X-TOP-Timestamp": timestamp.toString(),
-            "X-TOP-Nonce": nonce,
-            "X-TOP-Account-Id": ak,
-            "X-TOP-Signature": generateSignature("POST", endpoint, sk, body),
-            "X-TOP-Signature-Method": "HMAC-SHA256",
-          },
-          body: JSON.stringify(body),
-        },
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(
-          `Seedream API error: ${errorData.error?.message || response.statusText}`,
-        );
-      }
-
-      const data = await response.json();
-      console.log("Seedream API response:", data);
-
-      // 提取图片 URL
-      let imageUrl = null;
-      if (data.data && data.data.length > 0) {
-        imageUrl = data.data[0].url;
-      } else if (data.images && data.images.length > 0) {
-        imageUrl = data.images[0];
-      } else {
-        throw new Error("Unexpected output format from Seedream API");
-      }
-
-      if (!imageUrl) {
-        throw new Error("Failed to get image URL from Seedream API");
-      }
-
-      console.log("Image generated successfully:", imageUrl);
-      setImageUrl(imageUrl);
-      setMetadata({ imageUrl, prompt });
+      console.log("Image generated successfully:", result.imageUrl);
+      setImageUrl(result.imageUrl);
     } catch (err) {
       console.error("Error generating meme:", err);
 
-      // 提供更友好的错误信息和解决方案
-      let errorMessage = "生成梗图时出错: ";
+      // Provide friendly error message and solutions
+      let errorMessage = "Error generating meme: ";
       if (err instanceof Error) {
         errorMessage += err.message;
 
-        // 针对 API 密钥错误提供具体解决方案
-        if (err.message.includes("Seedream API")) {
-          errorMessage += "\n\n解决方案：\n";
+        // Provide specific solutions for different API errors
+        if (
+          err.message.includes("502") ||
+          err.message.includes("Bad Gateway")
+        ) {
+          errorMessage += "\n\nSolutions:\n";
           errorMessage +=
-            "1. 检查 .env 文件中是否正确配置了 Seedream API 密钥\n";
-          errorMessage += "2. 确保使用了正确的环境变量名称：\n";
-          errorMessage += "   - NEXT_PUBLIC_SEEDREAM_API_AK (Access Key)\n";
-          errorMessage += "   - NEXT_PUBLIC_SEEDREAM_API_SK (Secret Key)\n";
-          errorMessage += "3. 重启开发服务器以加载最新的环境变量\n";
+            "1. Please try again later, Volcengine API is temporarily unavailable\n";
+          errorMessage += "2. Check if network connection is normal\n";
+          errorMessage += "3. Try using a simpler prompt\n";
+        } else if (err.message.includes("API keys")) {
+          errorMessage += "\n\nSolutions:\n";
+          errorMessage +=
+            "1. Please contact administrator to configure API keys\n";
+          errorMessage +=
+            "2. Ensure backend server has correctly set environment variables\n";
+        } else if (err.message.includes("timeout")) {
+          errorMessage += "\n\nSolutions:\n";
+          errorMessage += "1. Please use a shorter prompt\n";
+          errorMessage += "2. Check if network connection is stable\n";
+          errorMessage += "3. Try again later\n";
+        } else if (err.message.includes("API error")) {
+          errorMessage += "\n\nSolutions:\n";
+          errorMessage += "1. Ensure backend server is running\n";
+          errorMessage +=
+            "2. Check if Seedream API keys are correctly configured in .env file\n";
+          errorMessage +=
+            "3. Ensure environment variable names in backend are correct\n";
+          errorMessage +=
+            "4. Restart backend server to load latest environment variables\n";
         }
       } else {
         errorMessage += "Unknown error";
@@ -180,31 +164,38 @@ export default function Home() {
     }
   };
 
-  const uploadMetadataToHelius = async (metadata: any) => {
-    const response = await fetch("https://api.helius.xyz/v1/metadata/upload", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.NEXT_PUBLIC_HELIUS_API_KEY || process.env.PUBLIC_HELIUS_API_KEY}`,
-      },
-      body: JSON.stringify({ metadata }),
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to upload metadata to Helius");
-    }
-
-    return await response.json();
-  };
-
+  /**
+   * Mint the generated meme as NFT
+   *
+   * @returns {Promise<void>} No return value, updates NFT minting state
+   */
   const mintNFT = async () => {
+    // Validate preconditions
     if (!wallet.publicKey) {
-      setError("请先连接钱包");
+      setError("Please connect your wallet first");
       return;
     }
 
     if (!imageUrl) {
-      setError("请先生成梗图");
+      setError("Please generate a meme first");
+      return;
+    }
+
+    // Check if balance is sufficient for minting fees
+    if (!nftService.validateMinimumBalance(balance)) {
+      const errorMsg =
+        "Your SOL balance is insufficient. You need at least 0.05 SOL to pay for minting fees (including Mint account creation fees). Please get more Devnet SOL and try again.";
+      console.error(errorMsg, { currentBalance: balance });
+      setError(errorMsg);
+      return;
+    }
+
+    // Check wallet permissions
+    if (!wallet.signTransaction) {
+      const errorMsg =
+        "Wallet does not have sufficient permissions to sign transactions. Please ensure wallet is fully connected.";
+      console.error(errorMsg, { wallet: wallet.publicKey?.toBase58() });
+      setError(errorMsg);
       return;
     }
 
@@ -212,72 +203,84 @@ export default function Home() {
     setError("");
 
     try {
-      // 创建 NFT metadata
-      const timestamp = Math.floor(Date.now() / 1000);
-      const shortPrompt =
-        prompt.length > 20 ? prompt.substring(0, 20) + "..." : prompt;
-      const nftMetadata = {
-        name: `Meme: ${shortPrompt}`,
-        description: `A meme generated from prompt: ${prompt}`,
-        image: imageUrl,
-        attributes: [
-          { trait_type: "Meme Type", value: "Generated" },
-          { trait_type: "Timestamp", value: timestamp.toString() },
-          { trait_type: "Prompt", value: prompt },
-        ],
-        external_url: "https://stalkgen.xyz",
-        seller_fee_basis_points: 500,
-        creators: [
-          {
-            address: wallet.publicKey.toBase58(),
-            verified: true,
-            share: 100,
-          },
-        ],
-      };
-
-      // 上传 metadata 到 Helius
-      console.log("Uploading metadata to Helius...");
-      const heliusResponse = await uploadMetadataToHelius(nftMetadata);
-      const metadataUri = heliusResponse.metadata_uri;
-      console.log("Metadata uploaded to:", metadataUri);
-
-      // 初始化 Metaplex
-      const metaplex = Metaplex.make(connection).use(
-        walletAdapterIdentity(wallet),
-      );
-
-      // Mint NFT
-      console.log("Minting NFT...");
-      const { nft, response } = await metaplex.nfts().create({
-        uri: metadataUri,
-        name: `Meme: ${shortPrompt}`,
-        symbol: "MEME",
-        sellerFeeBasisPoints: 500,
-        creators: [
-          {
-            address: wallet.publicKey,
-            share: 100,
-          },
-        ],
+      // Mint NFT using nftService
+      const mintResult = await nftService.mintNft({
+        wallet,
+        imageUrl,
+        prompt,
       });
 
-      // 构建 Solscan 链接
-      const mintAddress = nft.address.toBase58();
-      const solscanLink = `https://solscan.io/token/${mintAddress}?cluster=devnet`;
-
       console.log("NFT minted successfully!");
-      console.log("Mint address:", mintAddress);
-      console.log("Solscan link:", solscanLink);
+      console.log("Mint address:", mintResult.mintAddress);
+      console.log("Solscan link:", mintResult.solscanLink);
 
-      // 更新状态
-      setNftAddress(mintAddress);
-      setSolscanLink(solscanLink);
+      // Update NFT minting state
+      setNftAddress(mintResult.mintAddress);
+      setSolscanLink(mintResult.solscanLink);
       setNftMinted(true);
-      localStorage.setItem("lastSolscanLink", solscanLink);
+      localStorage.setItem("lastSolscanLink", mintResult.solscanLink);
     } catch (error) {
       console.error("Error minting NFT:", error);
-      setError("Mint NFT 时出错 💥");
+
+      // Provide detailed error message and solutions
+      let errorMessage = "Error minting NFT 💥\n\n";
+
+      if (error instanceof Error) {
+        errorMessage += `Error details: ${error.message}\n\n`;
+
+        // Provide specific solutions based on error type
+        if (error.message.includes("User rejected the request")) {
+          errorMessage += "Solutions:\n";
+          errorMessage +=
+            "1. Please ensure you have authorized wallet to sign transaction\n";
+          errorMessage +=
+            "2. Please check wallet popup and ensure you have clicked confirm button\n";
+          errorMessage +=
+            "3. If you accidentally rejected the request, please try minting again\n";
+        } else if (error.message.includes("AccountNotFoundError")) {
+          errorMessage += "Solutions:\n";
+          errorMessage +=
+            "1. Ensure you are using the correct network (Solana Devnet)\n";
+          errorMessage +=
+            "2. Ensure wallet has sufficient Devnet SOL (at least 0.05 SOL)\n";
+          errorMessage +=
+            "3. Please try refreshing the page, reconnecting wallet, then try minting again\n";
+          errorMessage +=
+            "4. Please ensure your wallet is fully synchronized to Devnet network\n";
+          errorMessage +=
+            "5. Try using another Devnet RPC endpoint, current RPC may be unstable\n";
+          errorMessage +=
+            "6. Try again later, transaction may not be confirmed due to network congestion\n";
+        } else if (error.message.includes("Failed to upload metadata")) {
+          errorMessage += "Solutions:\n";
+          errorMessage += "1. Check if metadata format is correct\n";
+          errorMessage +=
+            "2. Ensure image URL is accessible and format is correct\n";
+          errorMessage +=
+            "3. Try again later, may be network connection issue\n";
+        } else {
+          errorMessage += "Solutions:\n";
+          errorMessage +=
+            "1. Ensure wallet is connected and has sufficient SOL for gas fees\n";
+          errorMessage += "2. Check if network connection is normal\n";
+          errorMessage +=
+            "3. Ensure you have authorized wallet to sign transaction\n";
+          errorMessage +=
+            "4. Try again later, may be network congestion or service temporarily unavailable\n";
+        }
+      } else {
+        errorMessage += `Unknown error: ${String(error)}\n\n`;
+        errorMessage += "Solutions:\n";
+        errorMessage +=
+          "1. Ensure wallet is connected and has sufficient SOL for gas fees\n";
+        errorMessage += "2. Check if network connection is normal\n";
+        errorMessage +=
+          "3. Ensure you have authorized wallet to sign transaction\n";
+        errorMessage +=
+          "4. Try again later, may be network congestion or service temporarily unavailable\n";
+      }
+
+      setError(errorMessage);
     } finally {
       setMintLoading(false);
     }
@@ -288,7 +291,10 @@ export default function Home() {
       <div className="w-full max-w-4xl bg-white dark:bg-gray-900 rounded-lg shadow-lg p-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-bold">🎨 StalkGen NFT</h1>
-          <WalletMultiButton className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg" />
+          {/* 只在客户端渲染WalletMultiButton组件，避免hydration mismatch */}
+          {isClient && (
+            <WalletMultiButton className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg" />
+          )}
         </div>
         <p className="text-center text-gray-600 dark:text-gray-400 mb-8">
           AI 生成梗图并一键 Mint 为 NFT
@@ -296,8 +302,17 @@ export default function Home() {
 
         {wallet.publicKey && (
           <div className="mt-4 text-center text-sm text-gray-500 mb-6">
-            已连接钱包: {wallet.publicKey.toBase58().substring(0, 6)}...
-            {wallet.publicKey.toBase58().substring(38)}
+            <div className="mb-2">
+              已连接钱包: {wallet.publicKey.toBase58().substring(0, 6)}...
+              {wallet.publicKey.toBase58().substring(38)}
+            </div>
+            <div>
+              {balanceLoading ? (
+                <span>正在检查余额...</span>
+              ) : (
+                <span>余额: {balance.toFixed(6)} SOL</span>
+              )}
+            </div>
           </div>
         )}
 

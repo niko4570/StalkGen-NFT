@@ -11,6 +11,11 @@
   },
   "dependencies": {
     "@metaplex-foundation/js": "^0.20.1",
+    "@metaplex-foundation/mpl-token-metadata": "^3.4.0",
+    "@metaplex-foundation/umi": "^1.4.1",
+    "@metaplex-foundation/umi-bundle-defaults": "^1.4.1",
+    "@metaplex-foundation/umi-signer-wallet-adapters": "^1.4.1",
+    "@metaplex-foundation/umi-uploader-irys": "^1.4.2",
     "@radix-ui/react-slot": "^1.1.0",
     "@solana/wallet-adapter-base": "^0.9.27",
     "@solana/wallet-adapter-react": "^0.15.39",

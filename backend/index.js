@@ -1,118 +1,83 @@
 /**
  * StalkGen NFT Backend Server
  *
- * This file serves as the entry point for the StalkGen NFT backend server,
- * setting up Express.js and configuring all API routes.
- *
- * @module index
- * @description Main backend server configuration and route setup
+ * Main entry point for the backend API server.
+ * Sets up Express, configures middleware, and defines routes.
  */
 
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
-import { generateMeme, testHeliusUpload } from "./routes/generate-meme.js";
+import { generateMeme } from "./routes/generate-meme.js";
 import { mintNFT } from "./routes/mint-nft.js";
-import {
-  restyleImage,
-  testFalAi,
-  getAvailableStyles,
-} from "./routes/fal-ai.js";
-import path from "path";
+import { uploadMetadata } from "./routes/upload-metadata.js";
+import { config, validateConfig } from "./config/config.js";
 
-/**
- * Load environment variables from the root directory
- *
- * This ensures all API keys and configuration values are loaded
- * before the server starts.
- */
-const envPath = path.resolve("../.env");
-console.log(`Loading environment variables from: ${envPath}`);
-dotenv.config({ path: envPath });
+// Validate configuration before starting the server
+try {
+  validateConfig();
+  console.log("✅ Configuration validated successfully");
+} catch (error) {
+  console.error("❌ Configuration validation failed:", error.message);
+  process.exit(1);
+}
 
-/**
- * Log environment variable loading status
- *
- * This provides visibility into which API keys and configuration values
- * are successfully loaded at server startup.
- */
-const seedreamAk =
-  process.env.NEXT_PUBLIC_SEEDREAM_API_AK || process.env.PUBLIC_SEEDREAM_API_AK;
-const seedreamSk =
-  process.env.NEXT_PUBLIC_SEEDREAM_API_SK || process.env.PUBLIC_SEEDREAM_API_SK;
-const solanaRpcUrl =
-  process.env.NEXT_PUBLIC_SOLANA_RPC_URL || process.env.PUBLIC_SOLANA_RPC_URL;
-
-console.log(`PUBLIC_SEEDREAM_API_AK loaded: ${!!seedreamAk}`);
-console.log(`PUBLIC_SEEDREAM_API_SK loaded: ${!!seedreamSk}`);
-console.log(`PUBLIC_SOLANA_RPC_URL loaded: ${!!solanaRpcUrl}`);
-console.log(`HELIUS_API_KEY loaded: ${!!process.env.HELIUS_API_KEY}`);
-
-/**
- * Initialize Express application
- *
- * Creates a new Express.js application instance for handling HTTP requests.
- */
+// Create Express app
 const app = express();
+const PORT = config.server.port;
 
-/**
- * Set server port
- *
- * Uses the PORT environment variable if specified, otherwise defaults to 3002.
- */
-const PORT = process.env.PORT || 3004;
-
-/**
- * Configure Express middleware
- *
- * - cors(): Enables Cross-Origin Resource Sharing for all routes
- * - express.json(): Parses JSON request bodies
- */
+// Configure middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true }));
 
-/**
- * API Routes Configuration
- *
- * Maps HTTP endpoints to their corresponding handler functions:
- *
- * POST endpoints:
- * - /api/generate-meme: Generate memes using AI
- * - /api/mint-nft: Mint generated memes as NFTs
- * - /api/test-helius: Test Helius API integration
- * - /api/restyle-image: Restyle images using FAL AI
- * - /api/test-fal-ai: Test FAL AI API integration
- *
- * GET endpoints:
- * - /api/available-styles: Get available styles for image restyling
- */
+// Health check endpoint
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok", timestamp: new Date().toISOString() });
+});
+
+// Meme generation endpoint
 app.post("/api/generate-meme", generateMeme);
+
+// NFT minting endpoint
 app.post("/api/mint-nft", mintNFT);
-app.post("/api/test-helius", testHeliusUpload);
-app.post("/api/restyle-image", restyleImage);
-app.post("/api/test-fal-ai", testFalAi);
-app.get("/api/available-styles", getAvailableStyles);
 
-/**
- * Health check endpoint
- *
- * Provides a simple endpoint to verify the server is running correctly.
- *
- * @route GET /
- * @returns {Object} JSON response with status message
- */
-app.get("/", (req, res) => {
-  res.json({ message: "StalkGen Backend is running!" });
+// Metadata upload endpoint
+app.post("/api/upload-metadata", uploadMetadata);
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ error: "Endpoint not found" });
 });
 
-/**
- * Start the server
- *
- * Listens for incoming HTTP requests on the specified port.
- *
- * @param {number} PORT - The port number to listen on
- * @returns {void}
- */
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error("Unhandled error:", err);
+  res.status(500).json({
+    error: "Internal server error",
+    details:
+      config.server.env === "development"
+        ? err.message
+        : "Something went wrong",
+  });
+});
+
+// Start server
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 StalkGen NFT Backend running on port ${PORT}`);
+  console.log(`📍 Health check: http://localhost:${PORT}/api/health`);
+  console.log(
+    `🎨 Meme generation: POST http://localhost:${PORT}/api/generate-meme`,
+  );
+  console.log(
+    `🖼️  NFT minting: POST http://localhost:${PORT}/api/mint-nft`,
+  );
+  console.log(
+    `📁 Metadata upload: POST http://localhost:${PORT}/api/upload-metadata`,
+  );
+  console.log(`\nRequired environment variables:`);
+  console.log(`- SEEDREAM_API_AK: Volcengine Access Key`);
+  console.log(`- SEEDREAM_API_SK: Volcengine Secret Key`);
+  console.log(`- HELIUS_API_KEY: Helius API key (for metadata upload)`);
 });
+
+export default app;
