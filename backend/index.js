@@ -66,3 +66,13 @@ app.use((err, req, res, next) => {
 // Export the app as the default handler for Vercel Serverless Functions
 // This is the ONLY required export – Vercel uses this to handle incoming requests
 export default app;
+
+// Start server if running directly (for Railway, local development, etc.)
+// This won't run when imported as a module by Vercel
+if (process.argv[1] === new URL(import.meta.url).pathname) {
+  const PORT = process.env.PORT || config.server.port;
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
+  });
+}
