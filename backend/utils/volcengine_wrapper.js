@@ -7,7 +7,7 @@
 
 import { config } from "../config/config.js";
 import axios from "axios";
-import { Signer } from '@volcengine/openapi';
+import { Signer } from "@volcengine/openapi";
 
 class VolcengineWrapper {
   constructor() {
@@ -20,12 +20,24 @@ class VolcengineWrapper {
     this.pollInterval = config.volcengine.pollInterval || 2000;
     this.maxPollAttempts = config.volcengine.maxPollAttempts || 60;
 
-    // Validate required credentials
-    if (!this.accessKey || !this.secretKey) {
-      throw new Error("Missing Volcengine API keys in configuration");
+    // Validate required credentials (but don't throw in constructor - Vercel initializes modules on cold start)
+    // Validation will be done in makeApiRequest method instead
+    if (
+      config.server.env === "development" &&
+      (!this.accessKey || !this.secretKey)
+    ) {
+      console.warn(
+        "Missing Volcengine API keys in configuration - will throw when making requests",
+      );
     }
 
-    console.log("VolcengineWrapper initialized with endpoint:", this.endpoint);
+    // Only log in development mode
+    if (config.server.env === "development") {
+      console.log(
+        "VolcengineWrapper initialized with endpoint:",
+        this.endpoint,
+      );
+    }
   }
 
   /**
@@ -35,68 +47,106 @@ class VolcengineWrapper {
    * @returns {Promise<Object>} API response
    */
   async makeApiRequest(action, body) {
+    // Validate required credentials before making request
+    if (!this.accessKey || !this.secretKey) {
+      throw new Error("Missing Volcengine API keys in configuration");
+    }
+
     // API Version from official documentation
     const version = "2022-08-31";
-    
+
     // Build full URL
     const fullUrl = new URL(this.endpoint);
-    fullUrl.searchParams.append('Action', action);
-    fullUrl.searchParams.append('Version', version);
-    
+    fullUrl.searchParams.append("Action", action);
+    fullUrl.searchParams.append("Version", version);
+
     // Convert body to string
     const bodyStr = JSON.stringify(body);
-    
+
     // Create request object for Signer
     const requestObj = {
       region: this.region,
-      method: 'POST',
+      method: "POST",
       // Query parameters
       params: {
         Action: action,
-        Version: version
+        Version: version,
       },
       // Request headers
       headers: {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       },
       // Request body
       body: bodyStr,
     };
-    
+
     // Create Signer instance with service name
-    const signer = new Signer(requestObj, this.service);
-    
+    let signer;
+    try {
+      signer = new Signer(requestObj, this.service);
+    } catch (signerError) {
+      console.error("Error creating Signer:", signerError);
+      throw new Error(
+        `Failed to create request signer: ${signerError.message}`,
+      );
+    }
+
     // Add authorization using official SDK signing method
-    signer.addAuthorization({ 
-      accessKeyId: this.accessKey, 
-      secretKey: this.secretKey 
-    });
-    
+    try {
+      signer.addAuthorization({
+        accessKeyId: this.accessKey,
+        secretKey: this.secretKey,
+      });
+    } catch (authError) {
+      console.error("Error adding authorization:", authError);
+      throw new Error(`Failed to sign request: ${authError.message}`);
+    }
+
     try {
       // Make the signed request
       const response = await axios({
-        method: 'POST',
+        method: "POST",
         url: fullUrl.toString(),
         headers: requestObj.headers,
         data: bodyStr,
         timeout: this.timeout,
-        responseType: 'json'
+        responseType: "json",
       });
+
+      // Only log in development mode
+      if (config.server.env === "development") {
+        console.log(`API Response for ${action}:`, response.data);
+      }
 
       return response.data;
     } catch (error) {
       if (error.response) {
         // The request was made and the server responded with a status code
         // that falls out of the range of 2xx
-        console.error("Volcengine API Error Response:", error.response.data);
+        if (config.server.env === "development") {
+          console.error(
+            `Volcengine API Error Response for ${action}:`,
+            error.response.data,
+          );
+        }
         throw new Error(`API Error: ${JSON.stringify(error.response.data)}`);
       } else if (error.request) {
         // The request was made but no response was received
-        console.error("Volcengine API No Response:", error.request);
+        if (config.server.env === "development") {
+          console.error(
+            `Volcengine API No Response for ${action}:`,
+            error.request,
+          );
+        }
         throw new Error("No response received from Volcengine API");
       } else {
         // Something happened in setting up the request that triggered an Error
-        console.error("Volcengine API Request Error:", error.message);
+        if (config.server.env === "development") {
+          console.error(
+            `Volcengine API Request Error for ${action}:`,
+            error.message,
+          );
+        }
         throw new Error(`Request Error: ${error.message}`);
       }
     }
@@ -146,10 +196,22 @@ class VolcengineWrapper {
   async generateImage(params) {
     try {
       // Validate input parameters
-      const validatedParams = this.validateImageParams(params);
+      let validatedParams;
+      try {
+        validatedParams = this.validateImageParams(params);
+      } catch (validationError) {
+        console.error("Image parameter validation error:", validationError);
+        throw new Error(`Invalid image parameters: ${validationError.message}`);
+      }
       const { prompt, width, height } = validatedParams;
 
-      console.log("Generating image with prompt:", prompt.slice(0, 50) + "...");
+      // Only log in development mode
+      if (config.server.env === "development") {
+        console.log(
+          "Generating image with prompt:",
+          prompt.slice(0, 50) + "...",
+        );
+      }
 
       // Build request body for Jimeng 4.0 API - following official documentation
       const requestBody = {
@@ -158,18 +220,30 @@ class VolcengineWrapper {
         width,
         height,
         force_single: true,
-        scale: 0.5
+        scale: 0.5,
       };
 
-      console.log("Calling Volcengine Jimeng API with:", requestBody);
+      if (config.server.env === "development") {
+        console.log("Calling Volcengine Jimeng API with:", requestBody);
+      }
 
       // Make API request to submit task
-      const submitResponse = await this.makeApiRequest(
-        "CVSync2AsyncSubmitTask",
-        requestBody,
-      );
+      let submitResponse;
+      try {
+        submitResponse = await this.makeApiRequest(
+          "CVSync2AsyncSubmitTask",
+          requestBody,
+        );
+      } catch (submitError) {
+        console.error("Error submitting image generation task:", submitError);
+        throw new Error(
+          `Failed to submit image generation task: ${submitError.message}`,
+        );
+      }
 
-      console.log("Submit response:", submitResponse);
+      if (config.server.env === "development") {
+        console.log("Submit response:", submitResponse);
+      }
 
       if (
         !submitResponse.code ||
@@ -182,10 +256,19 @@ class VolcengineWrapper {
       }
 
       const taskId = submitResponse.data.task_id;
-      console.log("Image generation task submitted with ID:", taskId);
+      if (config.server.env === "development") {
+        console.log("Image generation task submitted with ID:", taskId);
+      }
 
       // Poll for task completion
-      return this.pollTaskResult(taskId);
+      try {
+        return await this.pollTaskResult(taskId);
+      } catch (pollError) {
+        console.error(`Error polling task ${taskId}:`);
+        throw new Error(
+          `Failed to poll image generation task: ${pollError.message}`,
+        );
+      }
     } catch (error) {
       console.error("Error in generateImage:", error);
       throw error;
@@ -202,12 +285,17 @@ class VolcengineWrapper {
       throw new Error("Invalid task ID");
     }
 
-    console.log(`Polling task ${taskId} for completion`);
+    // Only log in development mode
+    if (config.server.env === "development") {
+      console.log(`Polling task ${taskId} for completion`);
+    }
 
     for (let attempt = 0; attempt < this.maxPollAttempts; attempt++) {
-      console.log(
-        `Polling task ${taskId}, attempt ${attempt + 1}/${this.maxPollAttempts}`,
-      );
+      if (config.server.env === "development") {
+        console.log(
+          `Polling task ${taskId}, attempt ${attempt + 1}/${this.maxPollAttempts}`,
+        );
+      }
 
       try {
         // Build request body for getting task result - following official documentation
@@ -217,12 +305,32 @@ class VolcengineWrapper {
         };
 
         // Make API request to get task result
-        const resultResponse = await this.makeApiRequest(
-          "CVSync2AsyncGetResult",
-          requestBody,
-        );
+        let resultResponse;
+        try {
+          resultResponse = await this.makeApiRequest(
+            "CVSync2AsyncGetResult",
+            requestBody,
+          );
+        } catch (pollError) {
+          console.error(
+            `Error making poll request for task ${taskId}:`,
+            pollError,
+          );
+          // Don't throw immediately, wait and retry
+          if (config.server.env === "development") {
+            console.log(
+              `Poll request failed, waiting ${this.pollInterval}ms before retry...`,
+            );
+          }
+          await new Promise((resolve) =>
+            setTimeout(resolve, this.pollInterval),
+          );
+          continue; // Retry poll
+        }
 
-        console.log("Poll response:", resultResponse);
+        if (config.server.env === "development") {
+          console.log("Poll response:", resultResponse);
+        }
 
         if (resultResponse.code === 10000 && resultResponse.data) {
           // Check if task is completed
@@ -231,7 +339,9 @@ class VolcengineWrapper {
             resultResponse.data.status === "done"
           ) {
             // Task completed successfully
-            console.log("Task completed successfully:", resultResponse.data);
+            if (config.server.env === "development") {
+              console.log("Task completed successfully:", resultResponse.data);
+            }
             return resultResponse.data;
           } else if (resultResponse.data.status === 2) {
             // Task failed
@@ -240,22 +350,42 @@ class VolcengineWrapper {
             );
           } else {
             // Task is still in progress, wait and retry
-            console.log(
-              `Task ${taskId} still in progress (status: ${resultResponse.data.status}), waiting ${this.pollInterval}ms...`,
-            );
+            if (config.server.env === "development") {
+              console.log(
+                `Task ${taskId} still in progress (status: ${resultResponse.data.status}), waiting ${this.pollInterval}ms...`,
+              );
+            }
             await new Promise((resolve) =>
               setTimeout(resolve, this.pollInterval),
             );
           }
         } else {
           // Unexpected response format
-          throw new Error(
-            `Failed to get task result: ${JSON.stringify(resultResponse)}`,
+          if (config.server.env === "development") {
+            console.log(
+              `Unexpected response format, waiting ${this.pollInterval}ms before retry...`,
+            );
+          }
+          await new Promise((resolve) =>
+            setTimeout(resolve, this.pollInterval),
           );
         }
       } catch (error) {
-        console.error(`Error polling task ${taskId}:`, error);
-        throw error;
+        // Only throw if it's a task failure, otherwise retry
+        if (
+          error.message.includes("Task failed") ||
+          error.message.includes("Invalid task ID")
+        ) {
+          console.error(`Error polling task ${taskId}:`, error);
+          throw error;
+        }
+        // For other errors, retry
+        if (config.server.env === "development") {
+          console.log(
+            `Poll attempt failed, waiting ${this.pollInterval}ms before retry...`,
+          );
+        }
+        await new Promise((resolve) => setTimeout(resolve, this.pollInterval));
       }
     }
 

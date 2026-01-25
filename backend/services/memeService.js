@@ -66,6 +66,7 @@ class MemeService {
    * Generate meme using Volcengine Jimeng 4.0 API
    * @param {Object} params - Generation parameters
    * @returns {Promise<Object>} Generated image data
+   * @throws {Error} If generation fails at any step
    */
   async generateMeme(params) {
     const validatedParams = this.validateParameters(params);
@@ -83,11 +84,17 @@ class MemeService {
       }
 
       // Call the Volcengine wrapper to generate the image
-      const result = await this.volcengineWrapper.generateImage({
-        prompt: validatedParams.prompt,
-        width: validatedParams.width,
-        height: validatedParams.height,
-      });
+      let result;
+      try {
+        result = await this.volcengineWrapper.generateImage({
+          prompt: validatedParams.prompt,
+          width: validatedParams.width,
+          height: validatedParams.height,
+        });
+      } catch (apiError) {
+        console.error("Volcengine API error:", apiError);
+        throw new Error(`Volcengine API error: ${apiError.message}`);
+      }
 
       if (config.server.env === "development") {
         console.log("Received result from Volcengine API:", result);
