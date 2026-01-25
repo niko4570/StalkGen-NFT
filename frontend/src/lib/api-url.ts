@@ -23,11 +23,12 @@ export function getApiUrl(): string {
 
     if (!internalUrl) {
       console.warn("🔴 API_INTERNAL_URL not found, falling back to public URL");
-      return process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3005";
+      const fallbackUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3005";
+      return fallbackUrl.startsWith('http') ? fallbackUrl : `http://${fallbackUrl}`;
     }
 
     console.log("🟢 Server-side: Using internal URL", internalUrl);
-    return internalUrl;
+    return internalUrl.startsWith('http') ? internalUrl : `http://${internalUrl}`;
   } else {
     // 🌐 Client-side: Use public URL
     // This uses the public domain that's accessible from the browser
@@ -40,8 +41,9 @@ export function getApiUrl(): string {
       return "http://localhost:3005";
     }
 
-    console.log("🟢 Client-side: Using public URL", publicUrl);
-    return publicUrl;
+    const fullUrl = publicUrl.startsWith('http') ? publicUrl : `https://${publicUrl}`;
+    console.log("🟢 Client-side: Using public URL", fullUrl);
+    return fullUrl;
   }
 }
 
