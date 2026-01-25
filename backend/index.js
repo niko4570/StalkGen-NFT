@@ -27,7 +27,35 @@ try {
 const app = express();
 
 // Apply global middleware
-app.use(cors()); // Enable CORS for frontend requests
+// Configure CORS for frontend requests, supporting Railway's public domains
+const allowedOrigins = [
+  // Local development
+  "http://localhost:3000",
+  "http://localhost:3005",
+  // Railway frontend domain (will be injected by Railway)
+  process.env.FRONTEND_URL,
+  process.env.NEXT_PUBLIC_FRONTEND_URL,
+  // Allow any origin for development
+  ...(process.env.NODE_ENV === "development" ? ["*"] : []),
+].filter(Boolean); // Remove undefined values
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (
+      !origin ||
+      allowedOrigins.includes(origin) ||
+      allowedOrigins.includes("*")
+    ) {
+      callback(null, true);
+    } else {
+      callback(new Error(`Not allowed by CORS: ${origin}`));
+    }
+  },
+  credentials: true,
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions)); // Enable CORS with configured options
 app.use(express.json({ limit: "10mb" })); // Parse JSON bodies (limit 10MB for image uploads)
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
@@ -71,8 +99,10 @@ export default app;
 // This won't run when imported as a module by Vercel
 if (process.argv[1] === new URL(import.meta.url).pathname) {
   const PORT = process.env.PORT || config.server.port;
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-    console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
+  const HOST = "0.0.0.0"; // Listen on all interfaces for Railway
+
+  app.listen(PORT, HOST, () => {
+    console.log(`🚀 Server running on ${HOST}:${PORT}`);
+    console.log(`🔗 Health check: http://${HOST}:${PORT}/api/health`);
   });
 }
