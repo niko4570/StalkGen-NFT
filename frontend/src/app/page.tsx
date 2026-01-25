@@ -15,6 +15,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { memeService } from "../services/memeService";
 import { nftService } from "../services/nftService";
+import { logApiUrlConfig } from "../lib/api-url";
 
 /**
  * NFT Metadata Interface
@@ -84,9 +85,19 @@ export default function Home() {
 
   /**
    * Mark component as client-side rendered to resolve hydration mismatch issues
+   * and log API URL configuration for debug purposes
    */
   useEffect(() => {
     setIsClient(true);
+
+    // 🐛 Debug logging: Check if Railway has correctly injected the URL variables
+    // This will log both public and internal URLs to the console
+    logApiUrlConfig();
+
+    // Log individual environment variables for verification
+    console.log("🔍 Environment Variables:");
+    console.log("   NEXT_PUBLIC_API_URL:", process.env.NEXT_PUBLIC_API_URL);
+    console.log("   API_INTERNAL_URL:", process.env.API_INTERNAL_URL);
   }, []);
 
   /**

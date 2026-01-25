@@ -4,6 +4,8 @@
  * Encapsulates the core business logic for generating memes using AI
  */
 
+import { getApiUrl } from '../lib/api-url';
+
 interface GenerateMemeParams {
   prompt: string;
   negative_prompt?: string;
@@ -17,12 +19,6 @@ interface GenerateMemeResult {
 }
 
 class MemeService {
-  private backendUrl: string;
-
-  constructor() {
-    this.backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3005";
-  }
-
   /**
    * Generate a meme using the backend API
    * @param params - Generation parameters
@@ -40,7 +36,12 @@ class MemeService {
       throw new Error("Prompt is required");
     }
 
-    const response = await fetch(`${this.backendUrl}/api/generate-meme`, {
+    // 🔄 Dynamic URL selection based on context
+    // - Client-side: Uses public URL from NEXT_PUBLIC_API_URL
+    // - Server-side: Uses internal URL from API_INTERNAL_URL (private networking)
+    const apiUrl = getApiUrl();
+
+    const response = await fetch(`${apiUrl}/api/generate-meme`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
