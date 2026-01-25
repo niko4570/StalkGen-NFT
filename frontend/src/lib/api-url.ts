@@ -2,7 +2,7 @@
  * API URL Utility
  *
  * This utility handles the distinction between public and internal URLs:
- * - Client-side: Uses NEXT_PUBLIC_API_URL (public domain)
+ * - Client-side: Uses NEXT_PUBLIC_BACKEND_URL (public domain)
  * - Server-side: Uses API_INTERNAL_URL (private networking)
  *
  * Railway automatically injects these environment variables based on service references.
@@ -23,7 +23,7 @@ export function getApiUrl(): string {
 
     if (!internalUrl) {
       console.warn("🔴 API_INTERNAL_URL not found, falling back to public URL");
-      return process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005";
+      return process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3005";
     }
 
     console.log("🟢 Server-side: Using internal URL", internalUrl);
@@ -31,11 +31,11 @@ export function getApiUrl(): string {
   } else {
     // 🌐 Client-side: Use public URL
     // This uses the public domain that's accessible from the browser
-    const publicUrl = process.env.NEXT_PUBLIC_API_URL;
+    const publicUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     if (!publicUrl) {
       console.warn(
-        "🔴 NEXT_PUBLIC_API_URL not found, falling back to localhost",
+        "🔴 NEXT_PUBLIC_BACKEND_URL not found, falling back to localhost",
       );
       return "http://localhost:3005";
     }
@@ -56,7 +56,10 @@ export function logApiUrlConfig(): void {
   console.log("   - Is Server:", isServer);
 
   // Only log variables that are available in the current context
-  console.log("   - NEXT_PUBLIC_API_URL:", process.env.NEXT_PUBLIC_API_URL);
+  console.log(
+    "   - NEXT_PUBLIC_BACKEND_URL:",
+    process.env.NEXT_PUBLIC_BACKEND_URL,
+  );
 
   // API_INTERNAL_URL is only available on server side (no NEXT_PUBLIC_ prefix)
   if (isServer) {
