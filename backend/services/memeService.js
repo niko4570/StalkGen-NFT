@@ -71,11 +71,16 @@ class MemeService {
     const validatedParams = this.validateParameters(params);
 
     this.activeRequests++;
-    console.log(`Active requests: ${this.activeRequests}`);
+    // Only log in development mode
+    if (config.server.env === "development") {
+      console.log(`Active requests: ${this.activeRequests}`);
+    }
 
     try {
       // Generate meme using Volcengine Jimeng 4.0 API
-      console.log("Generating image with prompt:", validatedParams.prompt);
+      if (config.server.env === "development") {
+        console.log("Generating image with prompt:", validatedParams.prompt);
+      }
 
       // Call the Volcengine wrapper to generate the image
       const result = await this.volcengineWrapper.generateImage({
@@ -84,7 +89,9 @@ class MemeService {
         height: validatedParams.height,
       });
 
-      console.log("Received result from Volcengine API:", result);
+      if (config.server.env === "development") {
+        console.log("Received result from Volcengine API:", result);
+      }
 
       // Extract image URL from the result
       let imageUrl = null;
@@ -111,11 +118,15 @@ class MemeService {
         );
       }
 
-      console.log("Image generated successfully:", imageUrl);
+      if (config.server.env === "development") {
+        console.log("Image generated successfully:", imageUrl);
+      }
       return { imageUrl, prompt: validatedParams.prompt };
     } finally {
       this.activeRequests--;
-      console.log(`Active requests: ${this.activeRequests}`);
+      if (config.server.env === "development") {
+        console.log(`Active requests: ${this.activeRequests}`);
+      }
     }
   }
 }

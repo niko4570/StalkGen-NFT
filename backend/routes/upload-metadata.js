@@ -18,6 +18,7 @@
 
 import { createUmi } from '@metaplex-foundation/umi-bundle-defaults';
 import { irysUploader } from '@metaplex-foundation/umi-uploader-irys';
+import { config } from '../config/config.js';
 
 /**
  * Upload metadata to Arweave for NFT minting
@@ -58,9 +59,13 @@ export async function uploadMetadata(req, res) {
       }));
 
     // 2. Upload metadata to Arweave using Irys
-    console.log("Uploading metadata to Arweave...");
+    if (config.server.env === "development") {
+      console.log("Uploading metadata to Arweave...");
+    }
     const metadataUri = await umi.uploader.uploadJson(metadata);
-    console.log("Metadata uploaded to:", metadataUri);
+    if (config.server.env === "development") {
+      console.log("Metadata uploaded to:", metadataUri);
+    }
 
     // 3. Return response
     res.json({

@@ -27,6 +27,7 @@ import {
 import { createGenericFile } from "@metaplex-foundation/umi";
 import { createNft } from "@metaplex-foundation/mpl-token-metadata";
 import bs58 from "bs58";
+import { config } from "../config/config.js";
 
 /**
  * Mint an NFT from a generated meme
@@ -62,8 +63,11 @@ export async function mintNFT(req, res) {
     const irysUrl =
       process.env.NEXT_PUBLIC_IRYS_URL || "https://devnet.irys.xyz";
 
-    console.log(`Setting up Umi with RPC URL: ${rpcUrl}`);
-    console.log(`Setting up Irys uploader with URL: ${irysUrl}`);
+    // Only log in development mode
+    if (config.server.env === "development") {
+      console.log(`Setting up Umi with RPC URL: ${rpcUrl}`);
+      console.log(`Setting up Irys uploader with URL: ${irysUrl}`);
+    }
 
     const umi = createUmi(rpcUrl)
       .use(mplTokenMetadata())
@@ -85,19 +89,25 @@ export async function mintNFT(req, res) {
     } else {
       // Generate new keypair for testing
       keypair = generateSigner(umi);
-      console.log("Generated new keypair for testing:", keypair.publicKey);
+      if (config.server.env === "development") {
+        console.log("Generated new keypair for testing:", keypair.publicKey);
+      }
 
       // Request small amount of SOL for testing keypair
       try {
         const signature = await umi.rpc.airdrop(keypair.publicKey, sol(0.1));
         // Wait for airdrop to confirm
         await umi.rpc.confirmTransaction(signature);
-        console.log("Airdrop successful");
+        if (config.server.env === "development") {
+          console.log("Airdrop successful");
+        }
       } catch (airdropError) {
-        console.warn(
-          "Airdrop failed (might be on mainnet):",
-          airdropError.message,
-        );
+        if (config.server.env === "development") {
+          console.warn(
+            "Airdrop failed (might be on mainnet):",
+            airdropError.message,
+          );
+        }
       }
     }
 
@@ -138,15 +148,21 @@ export async function mintNFT(req, res) {
     };
 
     // 4. Upload metadata to Arweave using Irys
-    console.log("Uploading metadata to Arweave...");
+    if (config.server.env === "development") {
+      console.log("Uploading metadata to Arweave...");
+    }
     const metadataUri = await umi.uploader.uploadJson(metadata);
-    console.log("Metadata uploaded to:", metadataUri);
+    if (config.server.env === "development") {
+      console.log("Metadata uploaded to:", metadataUri);
+    }
 
     // 5. Generate mint signer
     const mint = generateSigner(umi);
 
     // 6. Mint NFT using mpl-token-metadata
-    console.log("Minting NFT...");
+    if (config.server.env === "development") {
+      console.log("Minting NFT...");
+    }
     const transaction = await createNft(umi, {
       mint,
       name: `Meme: ${shortPrompt}`,
@@ -169,9 +185,11 @@ export async function mintNFT(req, res) {
     const transactionUrl = `https://solscan.io/tx/${transactionSignature}?cluster=${cluster}`;
     const mintUrl = `https://solscan.io/token/${mintAddress}?cluster=${cluster}`;
 
-    console.log("NFT minted successfully!");
-    console.log("Mint address:", mintAddress);
-    console.log("Transaction URL:", transactionUrl);
+    if (config.server.env === "development") {
+      console.log("NFT minted successfully!");
+      console.log("Mint address:", mintAddress);
+      console.log("Transaction URL:", transactionUrl);
+    }
 
     // 8. Return response
     res.json({

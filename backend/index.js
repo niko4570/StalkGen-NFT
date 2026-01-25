@@ -63,21 +63,26 @@ app.use((err, req, res, next) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚀 StalkGen NFT Backend running on port ${PORT}`);
-  console.log(`📍 Health check: http://localhost:${PORT}/api/health`);
-  console.log(
-    `🎨 Meme generation: POST http://localhost:${PORT}/api/generate-meme`,
-  );
-  console.log(
-    `🖼️  NFT minting: POST http://localhost:${PORT}/api/mint-nft`,
-  );
-  console.log(
-    `📁 Metadata upload: POST http://localhost:${PORT}/api/upload-metadata`,
-  );
-  console.log(`\nRequired environment variables:`);
-  console.log(`- SEEDREAM_API_AK: Volcengine Access Key`);
-  console.log(`- SEEDREAM_API_SK: Volcengine Secret Key`);
-  console.log(`- HELIUS_API_KEY: Helius API key (for metadata upload)`);
+  // Only log detailed information in development mode
+  if (config.server.env === "development") {
+    console.log(`🚀 StalkGen NFT Backend running on port ${PORT}`);
+    console.log(`📍 Health check: http://localhost:${PORT}/api/health`);
+    console.log(
+      `🎨 Meme generation: POST http://localhost:${PORT}/api/generate-meme`,
+    );
+    console.log(
+      `🖼️  NFT minting: POST http://localhost:${PORT}/api/mint-nft`,
+    );
+    console.log(
+      `📁 Metadata upload: POST http://localhost:${PORT}/api/upload-metadata`,
+    );
+    console.log(`\nRequired environment variables:`);
+    console.log(`- SEEDREAM_API_AK: Volcengine Access Key`);
+    console.log(`- SEEDREAM_API_SK: Volcengine Secret Key`);
+    console.log(`- HELIUS_API_KEY: Helius API key (for metadata upload)`);
+  } else {
+    console.log(`🚀 StalkGen NFT Backend running in ${config.server.env} mode on port ${PORT}`);
+  }
 });
 
 export default app;
