@@ -90,14 +90,28 @@ export default function Home() {
   useEffect(() => {
     setIsClient(true);
 
-    // 🐛 Debug logging: Check if Railway has correctly injected the URL variables
-    // This will log both public and internal URLs to the console
-    logApiUrlConfig();
+    // 🚨 SUPER SIMPLE DEBUG - Will definitely show up
+    console.log("🚨 StalkGen Debug Start");
+    console.log("🚨 NEXT_PUBLIC_API_URL:", process.env.NEXT_PUBLIC_API_URL);
 
-    // Log individual environment variables for verification
-    console.log("🔍 Environment Variables:");
-    console.log("   NEXT_PUBLIC_API_URL:", process.env.NEXT_PUBLIC_API_URL);
-    console.log("   API_INTERNAL_URL:", process.env.API_INTERNAL_URL);
+    // Test API connectivity directly
+    const testApiConnection = async () => {
+      try {
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005";
+        console.log("🚨 Testing API:", apiUrl);
+
+        const response = await fetch(`${apiUrl}/api/health`);
+        const data = await response.json();
+        console.log("✅ API Health Check:", data);
+        console.log("🚨 StalkGen Debug End");
+      } catch (error) {
+        console.error("❌ API Test Failed:", error);
+        console.log("🚨 StalkGen Debug End");
+      }
+    };
+
+    testApiConnection();
   }, []);
 
   /**
