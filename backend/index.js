@@ -31,24 +31,40 @@ const app = express();
 const allowedOrigins = [
   // Local development
   "http://localhost:3000",
+  "http://localhost:3002",
   "http://localhost:3005",
-  // Railway frontend domain (will be injected by Railway)
+  // Railway frontend domain (will be injected by Railway) - support with and without protocol
+  process.env.FRONTEND_URL?.replace(/^https?:\/\//, ""),
   process.env.FRONTEND_URL,
+  process.env.NEXT_PUBLIC_FRONTEND_URL?.replace(/^https?:\/\//, ""),
   process.env.NEXT_PUBLIC_FRONTEND_URL,
+  // Explicitly add known frontend domains
+  "stalkgen-frontend.up.railway.app",
+  "https://stalkgen-frontend.up.railway.app",
   // Allow any origin for development
   ...(process.env.NODE_ENV === "development" ? ["*"] : []),
-].filter(Boolean); // Remove undefined values
+].filter(Boolean); // Remove undefined and empty values
 
 const corsOptions = {
   origin: (origin, callback) => {
-    if (
-      !origin ||
-      allowedOrigins.includes(origin) ||
-      allowedOrigins.includes("*")
-    ) {
+    if (!origin) {
+      // Allow requests from same origin (e.g., curl requests)
       callback(null, true);
     } else {
-      callback(new Error(`Not allowed by CORS: ${origin}`));
+      // Check if origin is allowed (supports with or without protocol)
+      const originWithoutProtocol = origin.replace(/^https?:\/\//, "");
+      const isAllowed =
+        allowedOrigins.includes(origin) ||
+        allowedOrigins.includes(originWithoutProtocol) ||
+        allowedOrigins.includes("*");
+
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        console.warn(`CORS origin not allowed: ${origin}`);
+        console.warn(`Allowed origins: ${JSON.stringify(allowedOrigins)}`);
+        callback(new Error(`Not allowed by CORS: ${origin}`));
+      }
     }
   },
   credentials: true,
