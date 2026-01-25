@@ -228,6 +228,7 @@ jest.setup.js
 # 配置文件
 config.js
 config.local.js
+!backend/config/config.js
 
 # 数据库文件
 *.db
