@@ -13,7 +13,7 @@ import {
 import { clusterApiUrl } from "@solana/web3.js";
 import { useMemo } from "react";
 
-// 导入钱包适配器的默认样式
+// Import wallet adapter default styles
 import "@solana/wallet-adapter-react-ui/styles.css";
 
 interface WalletProviderWrapperProps {
@@ -29,14 +29,14 @@ export function WalletProviderWrapper({
     [network],
   );
 
-  // 创建我们需要的钱包适配器
-  // 按照wallet-adapter文档中的标准方式设置
+  // Create the wallet adapters we need
+  // Set up according to the wallet-adapter documentation standards
   const wallets = useMemo(() => {
     return [new PhantomWalletAdapter(), new SolflareWalletAdapter({ network })];
   }, [network]);
 
-  // 按照wallet-adapter文档中的标准方式设置WalletProvider
-  // 使用标准的WalletProvider而不是自定义的包装器
+  // Set up WalletProvider according to the wallet-adapter documentation standards
+  // Using standard WalletProvider instead of custom wrapper
   return (
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider wallets={wallets} autoConnect={true}>
