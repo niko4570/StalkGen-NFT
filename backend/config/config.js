@@ -68,19 +68,6 @@ export const config = {
     },
     imageFormat: "jpeg", // Default output format
   },
-
-  // NFT metadata configuration
-  nftMetadata: {
-    sellerFeeBasisPoints: 500, // 5%
-    creators: [
-      {
-        address: "Helius1234567890", // Example address - replace with actual address
-        verified: false,
-        share: 100,
-      },
-    ],
-    externalUrl: "https://github.com/solana-labs/solana",
-  },
 };
 
 /**
