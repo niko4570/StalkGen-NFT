@@ -9,14 +9,18 @@
 // Only load dotenv in development environment
 // In production (Vercel), environment variables are set directly in the dashboard
 if (process.env.NODE_ENV !== "production") {
-  import("dotenv").then((dotenv) => {
-    // Try to load from root directory first (for monorepo setup)
-    dotenv.config({ path: "../.env" });
-    // Fallback to local .env file
-    dotenv.config();
-  }).catch((error) => {
-    console.warn("dotenv not available, using environment variables directly");
-  });
+  import("dotenv")
+    .then((dotenv) => {
+      // Try to load from root directory first (for monorepo setup)
+      dotenv.config({ path: "../.env" });
+      // Fallback to local .env file
+      dotenv.config();
+    })
+    .catch((error) => {
+      console.warn(
+        "dotenv not available, using environment variables directly",
+      );
+    });
 }
 
 /**
@@ -32,12 +36,12 @@ export const config = {
   // Volcengine Jimeng 4.0 API configuration
   volcengine: {
     // API keys
-    accessKey: process.env.SEEDREAM_API_AK || process.env.VOLCENGINE_API_AK,
-    secretKey: process.env.SEEDREAM_API_SK || process.env.VOLCENGINE_API_SK,
+    accessKey: process.env.SEEDREAM_API_AK,
+    secretKey: process.env.SEEDREAM_API_SK,
     endpoint:
       process.env.VOLCENGINE_ENDPOINT || "https://visual.volcengineapi.com/",
     region: process.env.VOLCENGINE_REGION || "cn-north-1",
-    service: "cv",
+    service: "cv", // computer vision
     timeout: 30000, // 30 seconds
     pollInterval: 2000, // 2 seconds
     maxPollAttempts: 60, // 2 minutes total

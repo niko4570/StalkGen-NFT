@@ -116,8 +116,8 @@ cp .env.example .env
 
 **必要环境变量**：
 
-- `SEEDREAM_API_AK` / `VOLCENGINE_API_AK`：Volcengine Access Key（二选一）
-- `SEEDREAM_API_SK` / `VOLCENGINE_API_SK`：Volcengine Secret Key（二选一）
+- `SEEDREAM_API_AK` ：Volcengine Access Key
+- `SEEDREAM_API_SK` ：Volcengine Secret Key
 - `HELIUS_API_KEY`：Helius API 密钥（用于元数据上传和 RPC）
 - `NEXT_PUBLIC_SOLANA_RPC_URL`：Solana RPC URL
 - `NEXT_PUBLIC_BACKEND_URL`：前端连接后端的 URL
