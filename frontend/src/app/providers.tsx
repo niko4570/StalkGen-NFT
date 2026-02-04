@@ -23,17 +23,31 @@ interface WalletProviderWrapperProps {
 export function WalletProviderWrapper({
   children,
 }: WalletProviderWrapperProps) {
+  // Check if running on client side
+  const isClient = typeof window !== "undefined";
+
+  // On client side, use full wallet provider
   const network = WalletAdapterNetwork.Devnet;
   const endpoint = useMemo(
-    () => process.env.NEXT_PUBLIC_SOLANA_RPC_URL || clusterApiUrl(network),
-    [network],
+    () =>
+      isClient
+        ? process.env.NEXT_PUBLIC_SOLANA_RPC_URL || clusterApiUrl(network)
+        : "",
+    [network, isClient],
   );
 
   // Create the wallet adapters we need
   // Set up according to the wallet-adapter documentation standards
   const wallets = useMemo(() => {
-    return [new PhantomWalletAdapter(), new SolflareWalletAdapter({ network })];
-  }, [network]);
+    return isClient
+      ? [new PhantomWalletAdapter(), new SolflareWalletAdapter({ network })]
+      : [];
+  }, [network, isClient]);
+
+  // On server side, return a simple wrapper
+  if (!isClient) {
+    return <>{children}</>;
+  }
 
   // Set up WalletProvider according to the wallet-adapter documentation standards
   // Using standard WalletProvider instead of custom wrapper

@@ -16,18 +16,6 @@ $RECYCLE.BIN/
 *.msp
 *.lnk
 
-# macOS
-.DS_Store
-.AppleDouble
-.LSOverride
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Linux
-*~
 
 # -------------------------------
 # 编辑器和IDE配置文件
@@ -38,31 +26,6 @@ Thumbs.db
 !.vscode/extensions.json
 !.vscode/settings.json
 
-# IntelliJ IDEA / WebStorm
-.idea/
-*.iml
-*.ipr
-*.iws
-
-# Eclipse
-.classpath
-.project
-.settings/
-
-# NetBeans
-nbproject/
-
-# Sublime Text
-*.sublime-project
-*.sublime-workspace
-
-# Vim
-*.swp
-*.swo
-*~
-
-# Emacs
-*~
 
 # -------------------------------
 # 依赖管理目录
@@ -75,33 +38,6 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-
-# Ruby
-bundle/
-vendor/bundle/
-
-# PHP
-vendor/
-composer.lock
-
-# Java
-target/
-build/
-
-# .NET
-bin/
-obj/
-
-# Go
-vendor/
-
-# Rust
-target/
 
 # -------------------------------
 # 构建输出目录
@@ -116,21 +52,6 @@ out/
 # Next.js
 .next/
 out/
-
-# Nuxt.js
-.nuxt/
-dist/
-
-# Gatsby.js
-public/
-.cache/
-
-# Vue.js
-dist/
-
-# Angular
-dist/
-build/
 
 # React Native
 build/

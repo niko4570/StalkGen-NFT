@@ -1,5 +1,0 @@
-[build]
-packageManager = "pnpm"
-
-[start]
-command = "node index.js"

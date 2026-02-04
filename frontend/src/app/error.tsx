@@ -1,23 +1,30 @@
-'use client';
+"use client";
 
-export default function Error({ 
-  error, 
-  reset 
-}: { 
-  error: Error & { digest?: string };
+export default function Error({
+  error,
+  reset,
+}: {
+  error: Error;
   reset: () => void;
 }) {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-black">
       <div className="text-center">
-        <h1 className="text-6xl font-bold text-gray-800 mb-4">500</h1>
-        <p className="text-xl text-gray-600 mb-4">服务器错误</p>
-        <p className="text-gray-500 mb-8">{error.message}</p>
+        <h1
+          className="text-6xl font-bold text-white mb-4 font-vt323"
+          style={{ textShadow: "0 0 10px #ff3366" }}
+        >
+          Error
+        </h1>
+        <p className="text-xl text-gray-300 mb-8 font-vt323">
+          Something went wrong
+        </p>
         <button
           onClick={() => reset()}
-          className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+          className="px-6 py-3 bg-[rgba(26,13,46,0.7)] text-white font-vt323 border-2 border-[#ffcc00] hover:border-[#ffea00] transition-colors"
+          style={{ textShadow: "0 0 4px #ffcc00" }}
         >
-          重试
+          Try again
         </button>
       </div>
     </div>

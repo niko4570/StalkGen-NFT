@@ -1,66 +1,69 @@
 "use client";
 
-/**
- * StalkGen NFT Main Page Component
- *
- * Provides a complete user interface for AI meme generation and NFT minting
- * - Wallet connection and balance display
- * - AI meme generation
- * - NFT minting and transaction lookup
- */
-
 import { useState, useEffect } from "react";
-import { Image, AlertCircle } from "lucide-react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { memeService } from "../services/memeService";
 import { nftService } from "../services/nftService";
-import { logApiUrlConfig } from "../lib/api-url";
+import { CyberpunkPanel } from "../components/ui/CyberpunkPanel";
+import { GenerateNFTPanel } from "../components/ui/GenerateNFTPanel";
+import { NFTPreviewPanel } from "../components/ui/NFTPreviewPanel";
+import { WalletProviderWrapper } from "./providers";
 
-/**
- * NFT Metadata Interface
- */
-interface Metadata {
-  imageUrl: string; // Image URL
-  prompt: string; // Prompt used to generate the image
-}
+// Reusable component: Neon Title
+const NeonTitle = ({ children }: { children: React.ReactNode }) => (
+  <h1
+    className="text-7xl md:text-8xl lg:text-9xl font-bold glitch neon-text"
+    data-text={String(children)}
+    aria-label={String(children)}
+    style={{
+      textShadow:
+        "0 0 15px #9966ff, 0 0 30px #9966ff, 0 0 45px #9966ff, 0 0 60px #9966ff, 0 0 75px #9966ff",
+      color: "#ffffff",
+      letterSpacing: "2px",
+    }}
+  >
+    {children}
+  </h1>
+);
 
-/**
- * StalkGen NFT Main Page Component
- */
-export default function Home() {
-  const wallet = useWallet(); // Solana wallet context
+// Reusable component: Pixel Preview
+const PixelPreview = ({ imageUrl }: { imageUrl: string }) => (
+  <div className="relative">
+    <img
+      src={imageUrl}
+      alt="Generated NFT"
+      className="w-full h-full object-contain image-rendering-pixelated"
+      aria-label="Generated NFT preview"
+    />
+  </div>
+);
 
-  // State management
-  const [prompt, setPrompt] = useState(""); // AI generation prompt
-  const [imageUrl, setImageUrl] = useState(""); // Generated image URL
-  const [loading, setLoading] = useState(false); // Meme generation loading state
-  const [mintLoading, setMintLoading] = useState(false); // NFT minting loading state
-  const [error, setError] = useState(""); // Error message
-  const [nftMinted, setNftMinted] = useState(false); // Whether NFT was successfully minted
-  const [nftAddress, setNftAddress] = useState(""); // Minted NFT address
-  const [solscanLink, setSolscanLink] = useState(""); // Solscan transaction lookup link
-
-  // Balance related states
-  const [balance, setBalance] = useState<number>(0); // Wallet SOL balance
-  const [balanceLoading, setBalanceLoading] = useState(false); // Balance loading state
-
-  // Client-side rendering flag to resolve hydration mismatch issues
+function HomeContent() {
+  const wallet = useWallet();
+  const [prompt, setPrompt] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [mintLoading, setMintLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [nftMinted, setNftMinted] = useState(false);
+  const [nftAddress, setNftAddress] = useState("");
+  const [solscanLink, setSolscanLink] = useState("");
+  const [balance, setBalance] = useState<number>(0);
+  const [balanceLoading, setBalanceLoading] = useState(false);
+  const [style, setStyle] = useState("cyberpunk");
   const [isClient, setIsClient] = useState(false);
 
-  /**
-   * Check wallet SOL balance
-   *
-   * @returns {Promise<void>} No return value, updates balance state
-   */
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const checkBalance = async () => {
-    if (!wallet.publicKey) return;
+    if (!isClient || !wallet.publicKey) return;
 
     setBalanceLoading(true);
     try {
       const solBalance = await nftService.checkBalance(wallet.publicKey);
       setBalance(solBalance);
-      console.log("Wallet balance:", solBalance, "SOL");
     } catch (err) {
       console.error("Error checking balance:", err);
       setError(
@@ -71,56 +74,14 @@ export default function Home() {
     }
   };
 
-  /**
-   * Automatically check balance when wallet connection status changes
-   */
   useEffect(() => {
-    if (wallet.connected && wallet.publicKey) {
+    if (isClient && wallet.connected && wallet.publicKey) {
       checkBalance();
     } else {
-      // Reset balance if wallet is disconnected
       setBalance(0);
     }
-  }, [wallet.connected, wallet.publicKey]);
+  }, [isClient, wallet.connected, wallet.publicKey]);
 
-  /**
-   * Mark component as client-side rendered to resolve hydration mismatch issues
-   * and log API URL configuration for debug purposes
-   */
-  useEffect(() => {
-    setIsClient(true);
-
-    // 🚨 SUPER SIMPLE DEBUG - Will definitely show up
-    console.log("🚨 StalkGen Debug Start");
-    console.log(
-      "🚨 NEXT_PUBLIC_BACKEND_URL:",
-      process.env.NEXT_PUBLIC_BACKEND_URL,
-    );
-
-    // Test API connectivity directly
-    const testApiConnection = async () => {
-      try {
-        const apiUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL?.startsWith("http") ? "" : "https://"}${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3005"}`;
-        console.log("🚨 Testing API:", apiUrl);
-
-        const response = await fetch(`${apiUrl}/api/health`);
-        const data = await response.json();
-        console.log("✅ API Health Check:", data);
-        console.log("🚨 StalkGen Debug End");
-      } catch (error) {
-        console.error("❌ API Test Failed:", error);
-        console.log("🚨 StalkGen Debug End");
-      }
-    };
-
-    testApiConnection();
-  }, []);
-
-  /**
-   * Generate meme using AI
-   *
-   * @returns {Promise<void>} No return value, updates image URL state
-   */
   const generateMeme = async () => {
     if (!prompt) {
       setError("Please enter a prompt");
@@ -132,7 +93,6 @@ export default function Home() {
     setNftMinted(false);
 
     try {
-      // Generate meme using memeService
       const result = await memeService.generateMeme({
         prompt,
         negative_prompt: "",
@@ -144,12 +104,10 @@ export default function Home() {
     } catch (err) {
       console.error("Error generating meme:", err);
 
-      // Provide friendly error message and solutions
       let errorMessage = "Error generating meme: ";
       if (err instanceof Error) {
         errorMessage += err.message;
 
-        // Provide specific solutions for different API errors
         if (
           err.message.includes("502") ||
           err.message.includes("Bad Gateway")
@@ -191,13 +149,12 @@ export default function Home() {
     }
   };
 
-  /**
-   * Mint the generated meme as NFT
-   *
-   * @returns {Promise<void>} No return value, updates NFT minting state
-   */
   const mintNFT = async () => {
-    // Validate preconditions
+    if (!isClient) {
+      setError("Please connect your wallet first");
+      return;
+    }
+
     if (!wallet.publicKey) {
       setError("Please connect your wallet first");
       return;
@@ -208,7 +165,6 @@ export default function Home() {
       return;
     }
 
-    // Check if balance is sufficient for minting fees
     if (!nftService.validateMinimumBalance(balance)) {
       const errorMsg =
         "Your SOL balance is insufficient. You need at least 0.05 SOL to pay for minting fees (including Mint account creation fees). Please get more Devnet SOL and try again.";
@@ -217,7 +173,6 @@ export default function Home() {
       return;
     }
 
-    // Check wallet permissions
     if (!wallet.signTransaction) {
       const errorMsg =
         "Wallet does not have sufficient permissions to sign transactions. Please ensure wallet is fully connected.";
@@ -230,7 +185,6 @@ export default function Home() {
     setError("");
 
     try {
-      // Mint NFT using nftService
       const mintResult = await nftService.mintNft({
         wallet,
         imageUrl,
@@ -241,7 +195,6 @@ export default function Home() {
       console.log("Mint address:", mintResult.mintAddress);
       console.log("Solscan link:", mintResult.solscanLink);
 
-      // Update NFT minting state
       setNftAddress(mintResult.mintAddress);
       setSolscanLink(mintResult.solscanLink);
       setNftMinted(true);
@@ -249,13 +202,11 @@ export default function Home() {
     } catch (error) {
       console.error("Error minting NFT:", error);
 
-      // Provide detailed error message and solutions
       let errorMessage = "Error minting NFT 💥\n\n";
 
       if (error instanceof Error) {
         errorMessage += `Error details: ${error.message}\n\n`;
 
-        // Provide specific solutions based on error type
         if (error.message.includes("User rejected the request")) {
           errorMessage += "Solutions:\n";
           errorMessage +=
@@ -314,166 +265,111 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-4xl bg-white dark:bg-gray-900 rounded-lg shadow-lg p-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold">🎨 StalkGen NFT</h1>
-          {/* 只在客户端渲染WalletMultiButton组件，避免hydration mismatch */}
-          {isClient && (
-            <WalletMultiButton className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg" />
-          )}
-        </div>
-        <p className="text-center text-gray-600 dark:text-gray-400 mb-8">
-          AI 生成梗图并一键 Mint 为 NFT
-        </p>
-
-        {wallet.publicKey && (
-          <div className="mt-4 text-center text-sm text-gray-500 mb-6">
-            <div className="mb-2">
-              已连接钱包: {wallet.publicKey.toBase58().substring(0, 6)}...
-              {wallet.publicKey.toBase58().substring(38)}
-            </div>
-            <div>
-              {balanceLoading ? (
-                <span>正在检查余额...</span>
-              ) : (
-                <span>余额: {balance.toFixed(6)} SOL</span>
-              )}
-            </div>
+    <div className="min-h-screen text-white font-vt323 relative z-0">
+      {/* 顶部标题 - 固定头部 */}
+      <header className="fixed top-0 left-0 right-0 z-50 py-6 px-4 md:py-8 bg-transparent">
+        <div className="container mx-auto flex flex-col md:flex-row justify-between items-start gap-4">
+          <div className="text-center md:text-left w-full md:w-auto">
+            <NeonTitle>STALKGEN-NFT</NeonTitle>
           </div>
-        )}
+        </div>
+      </header>
 
-        <div className="mb-6">
-          <textarea
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder="输入你的梗图提示词，例如：一只猫在电脑前编程"
-            className="w-full p-4 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            rows={4}
+      {/* 主要内容：垂直滚动布局 */}
+      <main className="flex-grow container mx-auto px-4 pt-40 pb-12 relative z-10 space-y-16 border-0">
+        {/* 介绍文字 */}
+        <section className="text-center max-w-3xl mx-auto">
+          <h2
+            className="text-3xl md:text-4xl mb-6 neon-text"
+            style={{
+              textShadow:
+                "0 0 10px #ffcc00, 0 0 20px #ffcc00, 0 0 30px #ffcc00",
+              color: "#ffffff",
+            }}
+          >
+            Create Your Unique Pixel Art NFT
+          </h2>
+          <p
+            className="text-lg md:text-xl mb-4 neon-text"
+            style={{
+              textShadow: "0 0 8px #ffcc00, 0 0 16px #ffcc00",
+              color: "#ffffff",
+            }}
+          >
+            Create your unique pixel art NFT with AI power
+          </p>
+          <p
+            className="text-xl md:text-2xl mb-8 neon-text"
+            style={{
+              textShadow: "0 0 10px #ffcc00, 0 0 20px #ffcc00",
+              color: "#ffffff",
+            }}
+          >
+            Generate stunning pixel art NFTs with AI, mint them on Solana, and
+            join the cyberpunk digital art revolution.
+          </p>
+        </section>
+
+        {/* 输入区域：Generate NFT 卡片 */}
+        <section className="flex justify-center">
+          <GenerateNFTPanel
+            prompt={prompt}
+            setPrompt={setPrompt}
+            onGenerate={generateMeme}
+            loading={loading}
+            error={error}
+            walletPublicKey={
+              isClient && wallet.publicKey ? wallet.publicKey.toBase58() : null
+            }
+            balance={balance}
+            balanceLoading={balanceLoading}
+            onMint={mintNFT}
+            mintLoading={mintLoading}
+            nftMinted={nftMinted}
+            nftAddress={nftAddress}
+            solscanLink={solscanLink}
+            style={style}
+            setStyle={setStyle}
           />
+        </section>
+
+        {/* NFT 预览区：下滑才能看到 */}
+        <section className="flex justify-center mt-12">
+          <NFTPreviewPanel imageUrl={imageUrl} style={style} />
+        </section>
+      </main>
+
+      {/* 底部说明文字 */}
+      <footer className="py-8 px-4 relative z-10">
+        <div className="container mx-auto text-center">
+          <p
+            className="text-xl md:text-2xl neon-text"
+            style={{
+              textShadow: "0 0 8px #ffcc00, 0 0 16px #ffcc00",
+              color: "#ffffff",
+            }}
+          >
+            StalkGen NFT - Create your unique AI-generated NFT
+          </p>
+          <p
+            className="neon-text mt-2"
+            style={{
+              textShadow: "0 0 6px #ffcc00, 0 0 12px #ffcc00",
+              color: "#ffffff",
+            }}
+          >
+            Powered by AI + Pixel Art + Solana
+          </p>
         </div>
-
-        {error && (
-          <div className="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 p-4 rounded-lg mb-6">
-            {error}
-          </div>
-        )}
-
-        <button
-          onClick={generateMeme}
-          disabled={loading}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
-        >
-          {loading ? (
-            <>
-              <svg
-                className="animate-spin -ml-1 mr-2 h-5 w-5 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              生成中...
-            </>
-          ) : (
-            "生成梗图"
-          )}
-        </button>
-
-        {imageUrl && (
-          <div className="mt-8">
-            <h2 className="text-2xl font-bold mb-4">生成结果</h2>
-            <div className="flex justify-center">
-              <div className="relative">
-                <Image
-                  className="absolute top-2 right-2 text-white bg-black bg-opacity-50 rounded-full p-1"
-                  size={24}
-                />
-                <img
-                  src={imageUrl}
-                  alt="Generated Meme"
-                  className="max-w-full max-h-96 object-contain rounded-lg"
-                />
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <button
-                onClick={mintNFT}
-                disabled={mintLoading || !wallet.publicKey}
-                className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
-              >
-                {mintLoading ? (
-                  <>
-                    <svg
-                      className="animate-spin -ml-1 mr-2 h-5 w-5 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
-                    铸造中...
-                  </>
-                ) : !wallet.publicKey ? (
-                  "请先连接钱包"
-                ) : (
-                  "Mint 为 NFT"
-                )}
-              </button>
-            </div>
-
-            {nftMinted && (
-              <div className="mt-6 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 p-4 rounded-lg">
-                <h3 className="font-bold">NFT Mint 成功！</h3>
-                <p className="mt-2">Mint 地址: {nftAddress}</p>
-                <p className="mt-2 text-sm">
-                  <a
-                    href={
-                      solscanLink ||
-                      `https://solscan.io/token/${nftAddress}?cluster=devnet`
-                    }
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 dark:text-blue-400 underline"
-                  >
-                    在 Solscan 上查看
-                  </a>
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      <footer className="mt-8 text-center text-gray-500 text-sm">
-        <p>StalkGen NFT - 用 AI 创造你的专属梗图 NFT</p>
       </footer>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <WalletProviderWrapper>
+      <HomeContent />
+    </WalletProviderWrapper>
   );
 }
