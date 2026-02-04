@@ -6,21 +6,22 @@
  * - In production (Vercel): Uses environment variables directly
  */
 
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // Only load dotenv in development environment
 // In production (Vercel), environment variables are set directly in the dashboard
 if (process.env.NODE_ENV !== "production") {
-  import("dotenv")
-    .then((dotenv) => {
-      // Try to load from root directory first (for monorepo setup)
-      dotenv.config({ path: "../.env" });
-      // Fallback to local .env file
-      dotenv.config();
-    })
-    .catch((error) => {
-      console.warn(
-        "dotenv not available, using environment variables directly",
-      );
-    });
+  // Load root-level .env (../../.env from backend/config) for monorepo setups
+  dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+  // Load backend-local .env if present
+  dotenv.config({ path: path.resolve(__dirname, "../.env") });
+  // Finally, allow process cwd .env as fallback
+  dotenv.config();
 }
 
 /**
