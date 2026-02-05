@@ -24,7 +24,6 @@ import {
   signerIdentity,
   sol,
 } from "@metaplex-foundation/umi";
-import { createGenericFile } from "@metaplex-foundation/umi";
 import { createNft } from "@metaplex-foundation/mpl-token-metadata";
 import bs58 from "bs58";
 import { config } from "../config/config.js";
