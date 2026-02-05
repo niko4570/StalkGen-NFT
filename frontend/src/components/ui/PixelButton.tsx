@@ -54,13 +54,13 @@ export function PixelButton({
       </span>
 
       <span className="relative z-10 flex flex-col text-left text-[#ffe7b7]">
-        <span className="text-[0.6rem] tracking-[0.45em] text-[#ffd6a3]/70">
+        <span className="text-[0.6rem] tracking-[0.45em] text-[#b0906b]/80">
           {isWalletConnectButton ? "Wallet Sync" : "Command"}
         </span>
         <span className="text-2xl tracking-[0.2em]">{children}</span>
       </span>
 
-      <span className="relative z-10 text-right text-[0.7rem] tracking-[0.35em] text-[#ffd6a3]/80">
+      <span className="relative z-10 text-right text-[0.7rem] tracking-[0.35em] text-[#d7b88b]/85">
         <span className="block text-[0.6rem]">Status</span>
         <span className="text-[#ffd166]">{disabled ? "Standby" : "Ready"}</span>
       </span>

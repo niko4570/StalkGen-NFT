@@ -69,7 +69,7 @@ const NeonTitle = ({ children }: { children: React.ReactNode }) => (
     aria-label={String(children)}
   >
     <h1
-      className="glitch neon-text-amber neon-text-pulse font-heading text-6xl md:text-7xl lg:text-8xl uppercase tracking-[0.08em] text-[#ffeeb3]"
+      className="glitch neon-text-amber neon-text-pulse font-heading text-6xl md:text-7xl lg:text-8xl uppercase tracking-[0.08em] text-[#f7e6cf]"
       data-text={String(children)}
     >
       {children}
@@ -428,11 +428,11 @@ function HomeContent() {
       </header>
 
       <main className="relative z-20 space-y-24 pb-24">
-        <section className="container px-4 pt-24 lg:pt-32">
-          <div className="rounded-[36px] border border-[#ff2e49]/25 bg-[rgba(30,5,10,0.4)] p-6 shadow-[0_60px_140px_rgba(80,0,20,0.45)] backdrop-blur-xl sm:p-12">
+        <section className="container px-4 pt-20 sm:pt-24 lg:pt-32">
+          <div className="torii-mask rounded-[32px] border border-[#ff2e49]/25 bg-[rgba(30,5,10,0.4)] p-5 shadow-[0_60px_140px_rgba(80,0,20,0.45)] backdrop-blur-xl sm:rounded-[36px] sm:p-12">
             <div className="grid gap-12 xl:grid-cols-[1.1fr_0.9fr]">
               <div className="space-y-8">
-                <div className="flex flex-wrap gap-3 text-[0.55rem] uppercase tracking-[0.45em] text-[#c4b5fd]">
+                <div className="flex flex-wrap gap-3 text-[0.5rem] uppercase tracking-[0.4em] text-[#c4b5fd] sm:text-[0.55rem] sm:tracking-[0.45em]">
                   {HERO_BADGES.map((badge) => (
                     <span
                       key={badge}
@@ -445,7 +445,7 @@ function HomeContent() {
 
                 <NeonTitle>STALKGEN NFT</NeonTitle>
 
-                <p className="max-w-2xl font-body text-lg text-[#ffd6a3]/85 md:text-2xl">
+                <p className="max-w-2xl font-body text-base text-[#d7b88b]/85 sm:text-lg md:text-2xl">
                   Prompt your cyberpunk meme, stream Volcengine Jimeng 4.0
                   renders, then mint straight to Solana with Umi + Irys in one
                   cinematic flow.
@@ -465,40 +465,103 @@ function HomeContent() {
                   </PixelButton>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {heroStats.map((stat) => (
-                    <div
-                      key={stat.label}
-                      className="rounded-2xl border border-[#ff2e49]/20 bg-[rgba(255,255,255,0.03)] p-5 shadow-[0_0_25px_rgba(255,46,73,0.1)] backdrop-blur-lg transition hover:border-[#ffd166] hover:shadow-[0_0_35px_rgba(255,209,102,0.25)]"
-                    >
-                      <p className="text-[0.55rem] font-heading uppercase tracking-[0.35em] text-[#ffd6a3]/80 neon-text-yellow">
-                        {stat.label}
-                      </p>
-                      <p className="mt-3 font-heading text-3xl text-[#fff3d6] tracking-[0.18em] neon-text-amber">
-                        {stat.value}
-                      </p>
-                      <p className="mt-1 text-sm text-[#ffe6ba]/80 font-body">
-                        {stat.href ? (
-                          <a
-                            href={stat.href}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-[#ffd166] underline decoration-dotted hover:text-white"
-                          >
-                            {stat.helper}
-                          </a>
-                        ) : (
-                          stat.helper
-                        )}
-                      </p>
-                    </div>
-                  ))}
-                </div>
               </div>
 
               <div className="space-y-6">
-                <div className="rounded-3xl border border-[#ff2e4925] bg-gradient-to-br from-[#150104]/35 via-[#090006]/45 to-[#05000a]/60 p-6 shadow-[0_0_50px_rgba(255,46,73,0.25)]">
-                  <div className="flex items-center justify-between text-[0.55rem] font-heading uppercase tracking-[0.3em] text-[#ffd6a3]/80">
+                <div className="rounded-3xl border border-[#ff2e4925] bg-gradient-to-br from-[#150104]/35 via-[#090006]/45 to-[#05000a]/60 p-5 shadow-[0_0_50px_rgba(255,46,73,0.25)] sm:p-6">
+                  <div className="flex items-center justify-between text-[0.55rem] font-heading uppercase tracking-[0.3em] text-[#b0906b]/85">
+                    <span>Live Signal</span>
+                    <span>Balanced Mode</span>
+                  </div>
+                  <div className="mt-5 space-y-4 text-sm text-[#d7b88b]/85 font-body">
+                    <div className="flex items-center justify-between">
+                      <span>Wallet</span>
+                      <span>
+                        {wallet.publicKey
+                          ? `${wallet.publicKey
+                              .toBase58()
+                              .slice(0, 4)}…${wallet.publicKey
+                              .toBase58()
+                              .slice(-4)}`
+                          : "Disconnected"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>Generator</span>
+                      <span>
+                        {loading
+                          ? "Synthesizing"
+                          : imageUrl
+                            ? "Preview Ready"
+                            : "Idle"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>Avg. Latency</span>
+                      <span>≈25s</span>
+                    </div>
+                  </div>
+                  <div className="mt-6 rounded-2xl border border-[#ff2e4922] bg-[#090105]/80 p-4">
+                    <p className="text-[0.55rem] uppercase tracking-[0.35em] text-[#b0906b]/80">
+                      Focus Cue
+                    </p>
+                    <p className="mt-3 text-lg text-[#d7b88b]/85 font-body">
+                      {timelineActive.description}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section
+          ref={generatorRef}
+          className="container px-4 pt-4 sm:pt-6"
+          aria-label="Generator workspace"
+        >
+          <div className="mx-auto grid max-w-6xl items-start gap-6 sm:gap-8 lg:gap-12 xl:grid-cols-2">
+            <div className="flex w-full justify-center xl:justify-start">
+              <GenerateNFTPanel
+                prompt={prompt}
+                setPrompt={setPrompt}
+                onGenerate={generateMeme}
+                loading={loading}
+                error={error}
+                walletPublicKey={
+                  isClient && wallet.publicKey
+                    ? wallet.publicKey.toBase58()
+                    : null
+                }
+                balance={balance}
+                balanceLoading={balanceLoading}
+                onMint={mintNFT}
+                mintLoading={mintLoading}
+                nftMinted={nftMinted}
+                nftAddress={nftAddress}
+                solscanLink={solscanLink}
+                style={style}
+                setStyle={setStyle}
+                panelClassName="w-full max-w-[520px] min-w-0 lg:max-w-[560px]"
+              />
+            </div>
+
+            <div className="flex w-full justify-center xl:justify-end">
+              <NFTPreviewPanel
+                imageUrl={imageUrl}
+                style={style}
+                panelClassName="w-full max-w-[520px] min-w-0 lg:max-w-[560px]"
+              />
+            </div>
+          </div>
+        </section>
+
+        <section className="container px-4">
+          <div className="torii-mask rounded-[32px] border border-[#ff2e4933] bg-gradient-to-br from-[#150105]/75 via-[#070003]/85 to-[#020006]/90 p-6 sm:p-10 shadow-[0_0_70px_rgba(40,0,10,0.7)] backdrop-blur-lg">
+            <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+              <div className="space-y-6">
+                <div className="rounded-3xl border border-[#ff2e4925] bg-[#0a0004]/70 p-6">
+                  <div className="flex items-center justify-between text-[0.55rem] font-heading uppercase tracking-[0.3em] text-[#b0906b]/85">
                     <span>Torii Flow Timeline</span>
                     <span>
                       Step {activeTimelineStep + 1}/{TIMELINE_STEPS.length}
@@ -528,10 +591,10 @@ function HomeContent() {
                           />
                           <div className="relative flex items-center gap-4">
                             <div>
-                              <p className="text-[0.55rem] uppercase tracking-[0.3em] text-[#ffd6a3]/60">
+                              <p className="text-[0.55rem] uppercase tracking-[0.3em] text-[#b0906b]/70">
                                 Step {index + 1}
                               </p>
-                              <p className="text-2xl font-heading text-[#fff6d8] tracking-[0.25em]">
+                              <p className="text-2xl font-heading text-[#f7e6cf] tracking-[0.25em]">
                                 {step.title}
                               </p>
                               <p className="text-sm text-white/70 font-body">
@@ -548,133 +611,78 @@ function HomeContent() {
                   </div>
 
                   <div className="mt-6 rounded-2xl border border-[#ff2e4922] bg-[#090105]/80 p-4">
-                    <p className="text-[0.55rem] uppercase tracking-[0.35em] text-[#ffd6a3]/70">
+                    <p className="text-[0.55rem] uppercase tracking-[0.35em] text-[#b0906b]/80">
                       Now Focused
                     </p>
-                    <p className="mt-3 text-lg text-[#ffe5bd]/85 font-body">
+                    <p className="mt-3 text-lg text-[#d7b88b]/85 font-body">
                       {timelineActive.description}
                     </p>
                   </div>
                 </div>
 
-                <div className="rounded-3xl border border-[#ff2e4933] bg-[#0a0004]/75 p-6">
-                  <p className="text-[0.55rem] uppercase tracking-[0.35em] text-[#ffd6a3]/70">
-                    Torii Status Feed
-                  </p>
-                  <ul className="mt-4 space-y-3 text-sm text-[#ffe9c2]/80 font-body">
-                    <li className="flex items-center justify-between gap-4">
-                      <span>Wallet Sync</span>
-                      <span>
-                        {wallet.publicKey
-                          ? `${wallet.publicKey
-                              .toBase58()
-                              .slice(0, 4)}…${wallet.publicKey
-                              .toBase58()
-                              .slice(-4)}`
-                          : "Disconnected"}
-                      </span>
-                    </li>
-                    <li className="flex items-center justify-between gap-4">
-                      <span>Generator</span>
-                      <span>
-                        {loading
-                          ? "Synthesizing"
-                          : imageUrl
-                            ? "Preview Ready"
-                            : "Idle"}
-                      </span>
-                    </li>
-                    <li className="flex items-center justify-between gap-4">
-                      <span>Mint</span>
-                      <span>
-                        {mintLoading
-                          ? "Processing"
-                          : nftMinted
-                            ? "Completed"
-                            : "Awaiting"}
-                      </span>
-                    </li>
-                  </ul>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {heroStats.map((stat) => (
+                    <div
+                      key={stat.label}
+                      className="rounded-2xl border border-[#ff2e49]/20 bg-[rgba(255,255,255,0.03)] p-5 shadow-[0_0_25px_rgba(255,46,73,0.1)] backdrop-blur-lg transition hover:border-[#ffd166] hover:shadow-[0_0_35px_rgba(255,209,102,0.25)]"
+                    >
+                      <p className="text-[0.55rem] font-heading uppercase tracking-[0.35em] text-[#b0906b]/85 neon-text-yellow">
+                        {stat.label}
+                      </p>
+                      <p className="mt-3 font-heading text-3xl text-[#f7e6cf] tracking-[0.18em] neon-text-amber">
+                        {stat.value}
+                      </p>
+                      <p className="mt-1 text-sm text-[#d7b88b]/80 font-body">
+                        {stat.href ? (
+                          <a
+                            href={stat.href}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-[#ffd166] underline decoration-dotted hover:text-[#f7e6cf]"
+                          >
+                            {stat.helper}
+                          </a>
+                        ) : (
+                          stat.helper
+                        )}
+                      </p>
+                    </div>
+                  ))}
                 </div>
               </div>
-            </div>
-          </div>
-        </section>
 
-        <section
-          ref={generatorRef}
-          className="container px-4"
-          aria-label="Generator workspace"
-        >
-          <div className="grid gap-10 xl:grid-cols-2">
-            <div className="flex justify-center xl:justify-start">
-              <GenerateNFTPanel
-                prompt={prompt}
-                setPrompt={setPrompt}
-                onGenerate={generateMeme}
-                loading={loading}
-                error={error}
-                walletPublicKey={
-                  isClient && wallet.publicKey
-                    ? wallet.publicKey.toBase58()
-                    : null
-                }
-                balance={balance}
-                balanceLoading={balanceLoading}
-                onMint={mintNFT}
-                mintLoading={mintLoading}
-                nftMinted={nftMinted}
-                nftAddress={nftAddress}
-                solscanLink={solscanLink}
-                style={style}
-                setStyle={setStyle}
-                panelClassName="max-w-full min-w-0"
-              />
-            </div>
-
-            <div className="flex justify-center xl:justify-end">
-              <NFTPreviewPanel
-                imageUrl={imageUrl}
-                style={style}
-                panelClassName="max-w-full min-w-0"
-              />
-            </div>
-          </div>
-        </section>
-
-        <section className="container px-4">
-          <div className="rounded-[32px] border border-[#ff2e4933] bg-gradient-to-br from-[#150105]/75 via-[#070003]/85 to-[#020006]/90 p-6 sm:p-10 shadow-[0_0_70px_rgba(40,0,10,0.7)] backdrop-blur-lg">
-            <div className="grid gap-6 md:grid-cols-3">
-              {experiencePanels.map((panel) => (
-                <div
-                  key={panel.title}
-                  className="rounded-3xl border border-[#ff2e4933] bg-[#070003]/85 p-6 shadow-[0_20px_50px_rgba(80,0,15,0.45)] transition hover:border-[#ffd166]/80"
-                >
-                  <p className="text-[0.55rem] font-heading uppercase tracking-[0.35em] text-[#ffd6a3]/80">
-                    {panel.title}
-                  </p>
-                  <p className="mt-4 font-heading text-4xl text-[#fff3d6] tracking-[0.15em]">
-                    {panel.metric}
-                  </p>
-                  <p className="mt-3 text-sm text-[#ffe6ba]/85 font-body leading-relaxed">
-                    {panel.body}
-                  </p>
-                </div>
-              ))}
+              <div className="grid gap-6">
+                {experiencePanels.map((panel) => (
+                  <div
+                    key={panel.title}
+                    className="rounded-3xl border border-[#ff2e4933] bg-[#070003]/85 p-6 shadow-[0_20px_50px_rgba(80,0,15,0.45)] transition hover:border-[#ffd166]/80"
+                  >
+                    <p className="text-[0.55rem] font-heading uppercase tracking-[0.35em] text-[#b0906b]/85">
+                      {panel.title}
+                    </p>
+                    <p className="mt-4 font-heading text-4xl text-[#f7e6cf] tracking-[0.15em]">
+                      {panel.metric}
+                    </p>
+                    <p className="mt-3 text-sm text-[#d7b88b]/85 font-body leading-relaxed">
+                      {panel.body}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>
       </main>
 
       <section className="container relative z-20 mt-12 px-4">
-        <div className="rounded-[28px] border border-[#ffd166]/50 bg-gradient-to-r from-[#1a0204]/70 via-[#0b0004]/85 to-[#040008]/92 p-8 text-center shadow-[0_30px_90px_rgba(60,0,10,0.7)]">
-          <p className="text-[0.6rem] font-heading uppercase tracking-[0.35em] text-[#ffd6a3]/85">
+        <div className="torii-mask rounded-[28px] border border-[#ffd166]/50 bg-gradient-to-r from-[#1a0204]/70 via-[#0b0004]/85 to-[#040008]/92 p-8 text-center shadow-[0_30px_90px_rgba(60,0,10,0.7)]">
+          <p className="text-[0.6rem] font-heading uppercase tracking-[0.35em] text-[#b0906b]/90">
             Final Call
           </p>
-          <h2 className="mt-4 font-heading text-4xl uppercase tracking-[0.2em] text-[#fff1ce]">
+          <h2 className="mt-4 font-heading text-4xl uppercase tracking-[0.2em] text-[#f7e6cf]">
             Forge Your Meme On-Chain
           </h2>
-          <p className="mt-3 text-base text-[#ffe6ba]/85 font-body">
+          <p className="mt-3 text-base text-[#d7b88b]/85 font-body">
             Prompt → Render → Mint, orchestrated in one neon control deck.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-4">

@@ -48,7 +48,7 @@ export function NFTPreviewPanel({
                     />
                   ))}
                 </div>
-                <p className="px-4 font-heading text-lg uppercase tracking-[0.4em] text-[#ffd6a3]/70">
+                <p className="px-4 font-heading text-lg uppercase tracking-[0.4em] text-[#b0906b]/80">
                   Feed the prompt to light up the frame.
                 </p>
               </div>
@@ -62,27 +62,27 @@ export function NFTPreviewPanel({
           )}
         </div>
 
-        <div className="grid gap-4 rounded-2xl border border-[#ffd166]/20 bg-[#0a0004]/60 p-5 text-sm uppercase tracking-[0.3em] text-[#ffd6a3]/80 sm:grid-cols-2">
+        <div className="grid gap-4 rounded-2xl border border-[#ffd166]/20 bg-[#0a0004]/60 p-5 text-sm uppercase tracking-[0.3em] text-[#d7b88b]/85 sm:grid-cols-2">
           <div>
-            <p className="text-xs text-[#ffd6a3]/60 neon-text-yellow">Status</p>
-            <p className="mt-2 font-heading text-2xl text-[#fff3d6] neon-text-amber">
+            <p className="text-xs text-[#b0906b]/75 neon-text-yellow">Status</p>
+            <p className="mt-2 font-heading text-2xl text-[#f7e6cf] neon-text-amber">
               {imageUrl ? "Ready" : "Awaiting Prompt"}
             </p>
           </div>
           <div>
-            <p className="text-xs text-[#ffd6a3]/60 neon-text-yellow">Style</p>
-            <p className="mt-2 font-heading text-2xl text-[#fff3d6] neon-text-amber">
+            <p className="text-xs text-[#b0906b]/75 neon-text-yellow">Style</p>
+            <p className="mt-2 font-heading text-2xl text-[#f7e6cf] neon-text-amber">
               {readableStyle}
             </p>
           </div>
           <div>
-            <p className="text-xs text-[#ffd6a3]/60 neon-text-yellow">Resolution</p>
-            <p className="mt-2 font-heading text-2xl text-[#fff3d6] neon-text-amber">
+            <p className="text-xs text-[#b0906b]/75 neon-text-yellow">Resolution</p>
+            <p className="mt-2 font-heading text-2xl text-[#f7e6cf] neon-text-amber">
               1024 x 1024
             </p>
           </div>
           <div>
-            <p className="text-xs text-[#ffd6a3]/60 neon-text-yellow">Checksum</p>
+            <p className="text-xs text-[#b0906b]/75 neon-text-yellow">Checksum</p>
             <p className="mt-2 font-heading text-2xl text-[#ffd166] neon-text-amber">
               {imageUrl ? "MATCHED" : "N/A"}
             </p>

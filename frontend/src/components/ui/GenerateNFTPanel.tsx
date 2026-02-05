@@ -47,7 +47,7 @@ export function GenerateNFTPanel({
 }: GenerateNFTPanelProps) {
   return (
     <CyberpunkPanel title="Generate NFT" className={panelClassName}>
-      <div className="space-y-5">
+      <div className="space-y-4 sm:space-y-5">
         {/* Input Label */}
         <label className="block space-y-2">
           <span className="font-heading text-sm uppercase tracking-[0.35em] text-[#ffd166] neon-text-amber">
@@ -58,10 +58,10 @@ export function GenerateNFTPanel({
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               placeholder="Eg. Neon oni hacker rallying cyber wolves under glitchy rain"
-              rows={5}
-              className="w-full rounded-2xl border border-[#ffd166]/30 bg-[#050001]/80 px-5 py-4 font-body text-base text-[#fff3d6]/90 placeholder:text-[#ffd6a3]/40 shadow-[0_0_35px_rgba(60,0,10,0.45)] transition focus:border-[#ffd166] focus:ring-2 focus:ring-[#ffd166]/40"
+              rows={4}
+              className="w-full rounded-2xl border border-[#ffd166]/30 bg-[#050001]/80 px-4 py-3 font-body text-base text-[#f7e6cf]/90 placeholder:text-[#b0906b]/40 shadow-[0_0_35px_rgba(60,0,10,0.45)] transition focus:border-[#ffd166] focus:ring-2 focus:ring-[#ffd166]/40 sm:px-5 sm:py-4"
             />
-            <span className="pointer-events-none absolute inset-y-4 right-4 text-xs uppercase tracking-[0.4em] text-[#ffd6a3]/50">
+            <span className="pointer-events-none absolute inset-y-3 right-4 text-xs uppercase tracking-[0.4em] text-[#b0906b]/60 sm:inset-y-4">
               1024px
             </span>
           </div>
@@ -86,12 +86,12 @@ export function GenerateNFTPanel({
                     : "border-[#ffd166]/20 bg-[#050001]/60 hover:border-[#ffd166]/60"
                 }`}
                 >
-                  <span className="font-heading text-sm uppercase tracking-[0.3em] text-[#fff3d6]">
+                  <span className="font-heading text-sm uppercase tracking-[0.3em] text-[#f7e6cf]">
                     {option.label}
                   </span>
                   <span
                     className={`h-3 w-3 rounded-full ${
-                      isSelected ? "bg-[#ffd166]" : "bg-[#ffd6a3]/40"
+                      isSelected ? "bg-[#ffd166]" : "bg-[#b0906b]/40"
                     }`}
                   />
                 </button>
@@ -101,7 +101,7 @@ export function GenerateNFTPanel({
         </fieldset>
 
         {/* Description */}
-        <div className="rounded-2xl border border-[#ffd166]/25 bg-[#050001]/70 p-4 font-body text-sm leading-relaxed text-[#ffd6a3]/80">
+        <div className="rounded-2xl border border-[#ffd166]/25 bg-[#050001]/70 p-3 text-sm leading-relaxed text-[#d7b88b]/85 sm:p-4 font-body">
           Describe the neon environment, characters, motion, and any lore hooks.
         </div>
 
@@ -111,7 +111,7 @@ export function GenerateNFTPanel({
             <span className="text-sm uppercase tracking-[0.4em] text-[#ffd166] neon-text-amber">
               Wallet Channel
             </span>
-            <span className="font-heading text-base tracking-[0.3em] text-[#fff3d6]/80">
+            <span className="font-heading text-base tracking-[0.3em] text-[#f7e6cf]/85">
               {walletPublicKey && typeof walletPublicKey === "string"
                 ? `${walletPublicKey.slice(0, 6)}…${walletPublicKey.slice(-4)}`
                 : "Disconnected"}
@@ -168,7 +168,7 @@ export function GenerateNFTPanel({
             <h3 className="font-heading text-2xl uppercase tracking-[0.3em] text-[#ffd166]">
               NFT Minted
             </h3>
-            <p className="mt-2 font-body text-[#fff3d6]/80">
+            <p className="mt-2 font-body text-[#d7b88b]/85">
               Mint Address: {nftAddress}
             </p>
             <p className="mt-3 font-body text-sm">
@@ -181,7 +181,7 @@ export function GenerateNFTPanel({
                 }
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#ffd166] underline decoration-dotted hover:text-[#fff3d6]"
+                className="text-[#ffd166] underline decoration-dotted hover:text-[#f7e6cf]"
               >
                 View on Solscan
               </a>
