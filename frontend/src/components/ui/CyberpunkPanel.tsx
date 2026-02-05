@@ -15,7 +15,7 @@ export function CyberpunkPanel({
     <div
       className={`
         cyberpunk-panel
-        relative w-full max-w-[520px] min-w-[380px]
+        relative w-full
         bg-gradient-to-br from-[rgba(26,13,46,0.45)] via-[rgba(30,15,60,0.5)] to-[rgba(42,26,74,0.5)]
         backdrop-blur-sm
         transition-all duration-300 ease-out

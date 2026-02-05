@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { CyberpunkPanel } from "./CyberpunkPanel";
 import { PixelButton } from "./PixelButton";
 
@@ -18,6 +17,7 @@ interface GenerateNFTPanelProps {
   solscanLink: string;
   style: string;
   setStyle: (style: string) => void;
+  panelClassName?: string;
 }
 
 export function GenerateNFTPanel({
@@ -36,9 +36,10 @@ export function GenerateNFTPanel({
   solscanLink,
   style,
   setStyle,
+  panelClassName,
 }: GenerateNFTPanelProps) {
   return (
-    <CyberpunkPanel title="Generate NFT">
+    <CyberpunkPanel title="Generate NFT" className={panelClassName}>
       <div className="space-y-5">
         {/* Input Label */}
         <label className="block">
@@ -188,7 +189,7 @@ export function GenerateNFTPanel({
         </div>
 
         {/* Mint Success Message */}
-        {nftMinted && (
+        {nftMinted && nftAddress && (
           <div className="p-4 bg-[rgba(40,30,10,0.5)] border-2 border-[#ffcc66]">
             <h3 className="font-vt323 text-2xl text-[#ffea00] mb-3">
               NFT MINTED SUCCESSFULLY!
@@ -200,7 +201,9 @@ export function GenerateNFTPanel({
               <a
                 href={
                   solscanLink ||
-                  `https://solscan.io/token/${nftAddress}?cluster=devnet`
+                  (nftAddress
+                    ? `https://solscan.io/token/${nftAddress}?cluster=devnet`
+                    : "#")
                 }
                 target="_blank"
                 rel="noopener noreferrer"

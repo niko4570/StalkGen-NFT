@@ -56,7 +56,7 @@ class NftService {
     imageUrl: string;
     prompt: string;
     walletPublicKey: PublicKey;
-  }): any {
+  }) {
     const { imageUrl, prompt, walletPublicKey } = params;
     const timestamp = Math.floor(Date.now() / 1000);
     const shortPrompt =
@@ -90,7 +90,7 @@ class NftService {
    * @returns {Promise<string>} Metadata URI
    */
   async uploadMetadata(
-    metadata: any,
+    metadata: ReturnType<typeof this.createMetadata>,
     wallet: WalletContextState,
   ): Promise<string> {
     console.log("Uploading metadata to Arweave using Umi + Irys web...");
