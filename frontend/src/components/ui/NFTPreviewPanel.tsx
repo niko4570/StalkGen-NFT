@@ -26,9 +26,9 @@ export function NFTPreviewPanel({
 
   return (
     <CyberpunkPanel title="NFT Preview" className={panelClassName}>
-      <div className="space-y-5">
-        <div className="group relative w-full overflow-hidden rounded-[24px] border border-[#ffcc66]/60 bg-[rgba(12,5,25,0.8)] p-4 transition hover:border-[#ffea00] sm:p-6">
-          <div className="relative aspect-square w-full overflow-hidden rounded-[18px] border border-[#ffcc66]/30 bg-black/40">
+      <div className="space-y-6">
+        <div className="group relative w-full overflow-hidden rounded-3xl border border-[#ff2e49]/30 bg-[#120205]/40 p-4 shadow-[0_0_40px_rgba(60,0,10,0.45)] transition duration-300 hover:border-[#ffd166]/40 sm:p-6">
+          <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-[#ffd166]/20 bg-gradient-to-br from-[#050005] to-[#15030a]">
             {imageUrl ? (
               <Image
                 src={imageUrl}
@@ -44,42 +44,46 @@ export function NFTPreviewPanel({
                   {PLACEHOLDER_GRID.map((_, index) => (
                     <span
                       key={index}
-                      className="h-4 w-4 rounded-[4px] bg-gradient-to-br from-[#ff00cc33] to-[#00f0ff22]"
+                      className="h-4 w-4 rounded-[6px] bg-gradient-to-br from-[#f43f5e]/40 to-[#22d3ee]/40 backdrop-blur"
                     />
                   ))}
                 </div>
-                <p className="px-4 text-xl text-[#ffcc99]/80">
-                  Enter a prompt to render your first cyberpunk meme.
+                <p className="px-4 font-heading text-lg uppercase tracking-[0.4em] text-[#ffd6a3]/70">
+                  Feed the prompt to light up the frame.
                 </p>
               </div>
             )}
           </div>
 
           {imageUrl && (
-            <div className="absolute inset-x-0 bottom-0 translate-y-full bg-gradient-to-t from-black/80 to-transparent px-6 pb-6 pt-16 text-center text-2xl uppercase tracking-[0.4em] text-[#ffea00] transition duration-300 group-hover:translate-y-0">
+            <div className="absolute inset-x-0 bottom-0 translate-y-full bg-gradient-to-t from-[#050003] via-[#050003]/90 to-transparent px-6 pb-6 pt-12 text-center font-heading text-xl uppercase tracking-[0.4em] text-[#ffd166] transition duration-300 group-hover:translate-y-0">
               Preview Locked In
             </div>
           )}
         </div>
 
-        <div className="grid gap-4 rounded-[18px] border border-[#ffcc66]/40 bg-black/40 p-5 text-sm uppercase tracking-[0.3em] text-white/60 sm:grid-cols-2">
+        <div className="grid gap-4 rounded-2xl border border-[#ffd166]/20 bg-[#0a0004]/60 p-5 text-sm uppercase tracking-[0.3em] text-[#ffd6a3]/80 sm:grid-cols-2">
           <div>
-            <p className="text-xs text-white/40">Status</p>
-            <p className="mt-2 text-2xl text-white">
+            <p className="text-xs text-[#ffd6a3]/60 neon-text-yellow">Status</p>
+            <p className="mt-2 font-heading text-2xl text-[#fff3d6] neon-text-amber">
               {imageUrl ? "Ready" : "Awaiting Prompt"}
             </p>
           </div>
           <div>
-            <p className="text-xs text-white/40">Style</p>
-            <p className="mt-2 text-2xl text-white">{readableStyle}</p>
+            <p className="text-xs text-[#ffd6a3]/60 neon-text-yellow">Style</p>
+            <p className="mt-2 font-heading text-2xl text-[#fff3d6] neon-text-amber">
+              {readableStyle}
+            </p>
           </div>
           <div>
-            <p className="text-xs text-white/40">Resolution</p>
-            <p className="mt-2 text-2xl text-white">1024 x 1024</p>
+            <p className="text-xs text-[#ffd6a3]/60 neon-text-yellow">Resolution</p>
+            <p className="mt-2 font-heading text-2xl text-[#fff3d6] neon-text-amber">
+              1024 x 1024
+            </p>
           </div>
           <div>
-            <p className="text-xs text-white/40">Checksum</p>
-            <p className="mt-2 text-2xl text-[#ffea00]">
+            <p className="text-xs text-[#ffd6a3]/60 neon-text-yellow">Checksum</p>
+            <p className="mt-2 font-heading text-2xl text-[#ffd166] neon-text-amber">
               {imageUrl ? "MATCHED" : "N/A"}
             </p>
           </div>

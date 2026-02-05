@@ -20,6 +20,13 @@ interface GenerateNFTPanelProps {
   panelClassName?: string;
 }
 
+const STYLE_OPTIONS = [
+  { value: "cyberpunk", label: "Cyberpunk Pixel Art" },
+  { value: "neon", label: "Neon Vaporwave" },
+  { value: "retro", label: "Retro 8-bit" },
+  { value: "torii", label: "Torii Gate Night" },
+];
+
 export function GenerateNFTPanel({
   prompt,
   setPrompt,
@@ -42,120 +49,88 @@ export function GenerateNFTPanel({
     <CyberpunkPanel title="Generate NFT" className={panelClassName}>
       <div className="space-y-5">
         {/* Input Label */}
-        <label className="block">
-          <span
-            className="font-vt323 text-xl text-[#ffdd44] mb-2 block"
-            style={{
-              textShadow: "0 0 4px #ffdd44, 1px 1px 0px rgba(0,0,0,0.5)",
-              imageRendering: "pixelated",
-            }}
-          >
-            Enter Prompt:
+        <label className="block space-y-2">
+          <span className="font-heading text-sm uppercase tracking-[0.35em] text-[#ffd166] neon-text-amber">
+            Enter Prompt
           </span>
-          <textarea
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Enter your NFT prompt here..."
-            rows={5}
-            className="
-              w-full px-4 py-3
-              bg-[rgba(40,30,10,0.5)]
-              border-2 border-[#ffcc66]
-              text-[#ffddaa] placeholder:text-[#ffcc99]/60
-              font-vt323 text-lg
-              focus:outline-none focus:border-[#ffea00]
-              focus:shadow-[0_0_12px_rgba(255,234,0,0.4)]
-              transition-all duration-200
-              resize-none
-            "
-            style={{
-              imageRendering: "pixelated",
-              textShadow: "1px 1px 0px rgba(0,0,0,0.3)",
-            }}
-          />
+          <div className="relative">
+            <textarea
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder="Eg. Neon oni hacker rallying cyber wolves under glitchy rain"
+              rows={5}
+              className="w-full rounded-2xl border border-[#ffd166]/30 bg-[#050001]/80 px-5 py-4 font-body text-base text-[#fff3d6]/90 placeholder:text-[#ffd6a3]/40 shadow-[0_0_35px_rgba(60,0,10,0.45)] transition focus:border-[#ffd166] focus:ring-2 focus:ring-[#ffd166]/40"
+            />
+            <span className="pointer-events-none absolute inset-y-4 right-4 text-xs uppercase tracking-[0.4em] text-[#ffd6a3]/50">
+              1024px
+            </span>
+          </div>
         </label>
 
         {/* Style Selector */}
-        <label className="block">
-          <span
-            className="font-vt323 text-xl text-[#ffdd44] mb-2 block"
-            style={{
-              textShadow: "0 0 4px #ffdd44, 1px 1px 0px rgba(0,0,0,0.5)",
-              imageRendering: "pixelated",
-            }}
-          >
-            NFT Style:
-          </span>
-          <select
-            value={style}
-            onChange={(e) => setStyle(e.target.value)}
-            className="
-              w-full px-4 py-3
-              bg-[rgba(40,30,10,0.5)]
-              border-2 border-[#ffcc66]
-              text-[#ffddaa]
-              font-vt323 text-lg
-              focus:outline-none focus:border-[#ffea00]
-              focus:shadow-[0_0_12px_rgba(255,234,0,0.4)]
-              transition-all duration-200
-              cursor-pointer
-            "
-            style={{
-              imageRendering: "pixelated",
-            }}
-          >
-            <option value="cyberpunk">Cyberpunk Pixel Art</option>
-            <option value="neon">Neon Vaporwave</option>
-            <option value="retro">Retro 8-bit</option>
-            <option value="torii">Torii Gate Night</option>
-          </select>
-        </label>
+        <fieldset className="space-y-3">
+          <legend className="font-heading text-sm uppercase tracking-[0.35em] text-[#ffd166] neon-text-amber">
+            NFT Style
+          </legend>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {STYLE_OPTIONS.map((option) => {
+              const isSelected = style === option.value;
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setStyle(option.value)}
+                className={`flex items-center justify-between rounded-2xl border px-4 py-3 text-left transition ${
+                  isSelected
+                    ? "border-[#ffd166]/80 bg-[#ffd1661a] shadow-[0_0_25px_rgba(255,209,102,0.35)]"
+                    : "border-[#ffd166]/20 bg-[#050001]/60 hover:border-[#ffd166]/60"
+                }`}
+                >
+                  <span className="font-heading text-sm uppercase tracking-[0.3em] text-[#fff3d6]">
+                    {option.label}
+                  </span>
+                  <span
+                    className={`h-3 w-3 rounded-full ${
+                      isSelected ? "bg-[#ffd166]" : "bg-[#ffd6a3]/40"
+                    }`}
+                  />
+                </button>
+              );
+            })}
+          </div>
+        </fieldset>
 
         {/* Description */}
-        <p
-          className="font-vt323 text-sm text-[#ffcc99]/80 leading-relaxed"
-          style={{
-            textShadow: "1px 1px 0px rgba(0,0,0,0.5)",
-          }}
-        >
-          Describe your ideal NFT pixel art
-        </p>
+        <div className="rounded-2xl border border-[#ffd166]/25 bg-[#050001]/70 p-4 font-body text-sm leading-relaxed text-[#ffd6a3]/80">
+          Describe the neon environment, characters, motion, and any lore hooks.
+        </div>
 
         {/* Wallet Connection Info */}
-        {walletPublicKey && typeof walletPublicKey === "string" && (
-          <div className="p-4 bg-[rgba(40,30,10,0.5)] border-2 border-[#ffcc66]">
-            <div className="mb-3">
-              <span className="font-vt323 text-lg text-[#ffcc99]">
-                Connected Wallet:{" "}
-              </span>
-              <span className="font-vt323 text-lg text-[#ffddaa]">
-                {walletPublicKey.substring(0, 6)}...
-                {walletPublicKey.substring(38)}
-              </span>
-            </div>
-            <div>
-              <span className="font-vt323 text-lg text-[#ffcc99]">
-                Balance:{" "}
-              </span>
-              {balanceLoading ? (
-                <span className="font-vt323 text-lg text-[#ffddaa]">
-                  Checking balance...
-                </span>
-              ) : (
-                <span className="font-vt323 text-lg text-[#ffddaa]">
-                  {balance.toFixed(6)} SOL
-                </span>
-              )}
-            </div>
+        <div className="rounded-2xl border border-[#ffd166]/30 bg-[#0a0004]/70 p-4 shadow-[0_0_30px_rgba(60,20,0,0.4)]">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+            <span className="text-sm uppercase tracking-[0.4em] text-[#ffd166] neon-text-amber">
+              Wallet Channel
+            </span>
+            <span className="font-heading text-base tracking-[0.3em] text-[#fff3d6]/80">
+              {walletPublicKey && typeof walletPublicKey === "string"
+                ? `${walletPublicKey.slice(0, 6)}…${walletPublicKey.slice(-4)}`
+                : "Disconnected"}
+            </span>
           </div>
-        )}
+          <div className="flex items-center justify-between text-sm uppercase tracking-[0.4em] text-[#ffd166] neon-text-amber">
+            <span>Balance</span>
+            <span className="font-heading text-2xl tracking-[0.3em] text-[#ffd166] neon-text-amber">
+              {balanceLoading
+                ? "SYNC…"
+                : `${balance.toFixed(3)} ${walletPublicKey ? "SOL" : ""}`}
+            </span>
+          </div>
+        </div>
 
         {/* Error Message */}
         {error && (
-          <div className="p-4 bg-[rgba(40,30,10,0.5)] border-2 border-[#ff6666]">
-            <div className="font-vt323 text-lg text-[#ff6666] whitespace-pre-line">
-              {error}
-            </div>
+          <div className="rounded-2xl border border-red-500/60 bg-red-500/10 p-4 font-body text-sm text-red-200 whitespace-pre-line">
+            {error}
           </div>
         )}
 
@@ -167,7 +142,7 @@ export function GenerateNFTPanel({
               loading || !walletPublicKey || typeof walletPublicKey !== "string"
             }
           >
-            {loading ? "GENERATING..." : "Generate"}
+            {loading ? "GENERATING…" : "Generate"}
           </PixelButton>
         </div>
 
@@ -181,23 +156,22 @@ export function GenerateNFTPanel({
             disabled={mintLoading}
           >
             {mintLoading
-              ? "MINTING..."
+              ? "MINTING…"
               : !walletPublicKey || typeof walletPublicKey !== "string"
                 ? "CONNECT WALLET"
                 : "MINT AS NFT"}
           </PixelButton>
         </div>
 
-        {/* Mint Success Message */}
         {nftMinted && nftAddress && (
-          <div className="p-4 bg-[rgba(40,30,10,0.5)] border-2 border-[#ffcc66]">
-            <h3 className="font-vt323 text-2xl text-[#ffea00] mb-3">
-              NFT MINTED SUCCESSFULLY!
+          <div className="rounded-2xl border border-[#ffd166]/60 bg-[#120205]/80 p-5 shadow-[0_0_30px_rgba(255,209,102,0.25)]">
+            <h3 className="font-heading text-2xl uppercase tracking-[0.3em] text-[#ffd166]">
+              NFT Minted
             </h3>
-            <p className="font-vt323 text-lg text-[#ffddaa] mb-3">
+            <p className="mt-2 font-body text-[#fff3d6]/80">
               Mint Address: {nftAddress}
             </p>
-            <p className="font-vt323 text-lg">
+            <p className="mt-3 font-body text-sm">
               <a
                 href={
                   solscanLink ||
@@ -207,7 +181,7 @@ export function GenerateNFTPanel({
                 }
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#ffea00] underline hover:text-[#ffff99]"
+                className="text-[#ffd166] underline decoration-dotted hover:text-[#fff3d6]"
               >
                 View on Solscan
               </a>

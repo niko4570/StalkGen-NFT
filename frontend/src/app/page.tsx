@@ -29,7 +29,7 @@ const TIMELINE_STEPS = [
     description:
       "Craft an evocative cyberpunk story, then let Volcengine Jimeng interpret every pixel-perfect beat.",
     accent:
-      "linear-gradient(120deg, rgba(255,0,204,0.4), rgba(255,234,0,0.15))",
+      "linear-gradient(120deg, rgba(255,46,73,0.45), rgba(255,209,102,0.2))",
     emoji: "⌨️",
   },
   {
@@ -38,7 +38,7 @@ const TIMELINE_STEPS = [
     description:
       "We fan out async jobs to Jimeng 4.0, poll for completions, and normalize the asset for the preview frame.",
     accent:
-      "linear-gradient(120deg, rgba(0,240,255,0.35), rgba(153,102,255,0.2))",
+      "linear-gradient(120deg, rgba(255,120,0,0.35), rgba(255,46,73,0.2))",
     emoji: "⚙️",
   },
   {
@@ -47,7 +47,7 @@ const TIMELINE_STEPS = [
     description:
       "Your Phantom/Solflare wallet stays in sync—SOL balance + permissions are validated before minting.",
     accent:
-      "linear-gradient(120deg, rgba(255,204,0,0.35), rgba(255,102,0,0.2))",
+      "linear-gradient(120deg, rgba(255,209,102,0.4), rgba(255,156,0,0.2))",
     emoji: "🔐",
   },
   {
@@ -56,26 +56,28 @@ const TIMELINE_STEPS = [
     description:
       "Metadata uploads via Irys, then Umi signs the mint tx so your pixel meme lives on Solana forever.",
     accent:
-      "linear-gradient(120deg, rgba(0,255,170,0.35), rgba(0,128,255,0.2))",
+      "linear-gradient(120deg, rgba(255,46,73,0.35), rgba(255,238,179,0.25))",
     emoji: "🚀",
   },
 ];
 
 // Reusable component: Neon Title
 const NeonTitle = ({ children }: { children: React.ReactNode }) => (
-  <h1
-    className="text-7xl md:text-8xl lg:text-9xl font-bold glitch neon-text"
-    data-text={String(children)}
+  <div
+    className="relative inline-block"
+    style={{ letterSpacing: "0.18em" }}
     aria-label={String(children)}
-    style={{
-      textShadow:
-        "0 0 15px #9966ff, 0 0 30px #9966ff, 0 0 45px #9966ff, 0 0 60px #9966ff, 0 0 75px #9966ff",
-      color: "#ffffff",
-      letterSpacing: "2px",
-    }}
   >
-    {children}
-  </h1>
+    <h1
+      className="glitch neon-text-amber neon-text-pulse font-heading text-6xl md:text-7xl lg:text-8xl uppercase tracking-[0.08em] text-[#ffeeb3]"
+      data-text={String(children)}
+    >
+      {children}
+    </h1>
+    <div className="absolute inset-0 pointer-events-none mix-blend-screen">
+      <div className="h-full w-full animate-[glitchShift_2.5s_infinite] border-b-4 border-[#ff2e49]/70" />
+    </div>
+  </div>
 );
 
 function HomeContent() {
@@ -396,28 +398,29 @@ function HomeContent() {
   const timelineActive = TIMELINE_STEPS[activeTimelineStep];
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#030014] text-white">
+    <div className="relative min-h-screen overflow-hidden bg-transparent text-white font-body">
+      <div className="torii-backdrop" aria-hidden />
       <div className="pointer-events-none absolute inset-0">
-        <div className="cyber-grid" aria-hidden />
-        <div className="neon-orb neon-orb--pink" aria-hidden />
-        <div className="neon-orb neon-orb--teal" aria-hidden />
-        <div className="neon-orb neon-orb--amber" aria-hidden />
+        <div className="cyber-grid bg-transparent" aria-hidden />
+        <div className="neon-orb neon-orb--pink opacity-30" aria-hidden />
+        <div className="neon-orb neon-orb--teal opacity-26" aria-hidden />
+        <div className="neon-orb neon-orb--amber opacity-26" aria-hidden />
       </div>
 
-      <header className="relative z-30 border-b border-white/10 bg-[#030014bb] backdrop-blur-xl">
-        <div className="container flex flex-wrap items-center justify-between gap-4 px-4 py-6 text-sm uppercase tracking-[0.3em] text-white/70">
+      <header className="relative z-30 border-b border-white/10 bg-[#1a031ae0] backdrop-blur-2xl">
+        <div className="container flex flex-wrap items-center justify-between gap-4 px-4 py-6 text-xs uppercase tracking-[0.35em] text-white/70">
           <div className="flex flex-wrap items-center gap-3">
-            <span className="rounded-full border border-white/20 px-3 py-1">
+            <span className="rounded-full border border-white/25 px-3 py-1 text-[0.55rem] tracking-[0.4em] text-[#c4b5fd]/80">
               Control Room
             </span>
-            <span className="rounded-full border border-white/20 px-3 py-1">
+            <span className="rounded-full border border-white/25 px-3 py-1 text-[0.55rem] tracking-[0.4em] text-[#fbbf24]/80">
               Live Devnet
             </span>
           </div>
 
           <button
             onClick={scrollToGenerator}
-            className="rounded-full border border-white/30 px-4 py-2 text-xs tracking-[0.4em] text-white transition hover:border-[#ffea00] hover:text-[#ffea00]"
+            className="rounded-full border border-white/30 px-4 py-2 text-[0.55rem] tracking-[0.35em] text-white transition hover:border-[#fbbf24] hover:text-[#fbbf24]"
           >
             START FLOW
           </button>
@@ -425,15 +428,15 @@ function HomeContent() {
       </header>
 
       <main className="relative z-20 space-y-24 pb-24">
-        <section className="container px-4 pt-24 lg:pt-28">
-          <div className="rounded-[36px] border border-white/10 bg-white/5/40 bg-gradient-to-br from-[#120020]/80 via-[#0a0020]/70 to-[#050011]/90 p-6 shadow-[0_50px_120px_rgba(0,0,0,0.45)] sm:p-10">
-            <div className="grid gap-12 lg:grid-cols-[1.05fr_0.95fr]">
+        <section className="container px-4 pt-24 lg:pt-32">
+          <div className="rounded-[36px] border border-[#ff2e49]/25 bg-[rgba(30,5,10,0.4)] p-6 shadow-[0_60px_140px_rgba(80,0,20,0.45)] backdrop-blur-xl sm:p-12">
+            <div className="grid gap-12 xl:grid-cols-[1.1fr_0.9fr]">
               <div className="space-y-8">
-                <div className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.3em] text-white/60">
+                <div className="flex flex-wrap gap-3 text-[0.55rem] uppercase tracking-[0.45em] text-[#c4b5fd]">
                   {HERO_BADGES.map((badge) => (
                     <span
                       key={badge}
-                      className="rounded-full border border-white/20 px-4 py-2 text-[0.6rem] tracking-[0.4em]"
+                  className="rounded-full border border-[#8b5cf6]/30 px-4 py-2 text-[0.55rem] tracking-[0.35em] bg-[#0f0f23]/60"
                     >
                       {badge}
                     </span>
@@ -442,7 +445,7 @@ function HomeContent() {
 
                 <NeonTitle>STALKGEN NFT</NeonTitle>
 
-                <p className="max-w-2xl text-lg text-white/70 md:text-2xl">
+                <p className="max-w-2xl font-body text-lg text-[#ffd6a3]/85 md:text-2xl">
                   Prompt your cyberpunk meme, stream Volcengine Jimeng 4.0
                   renders, then mint straight to Solana with Umi + Irys in one
                   cinematic flow.
@@ -466,19 +469,21 @@ function HomeContent() {
                   {heroStats.map((stat) => (
                     <div
                       key={stat.label}
-                      className="rounded-2xl border border-white/10 bg-black/20 p-4 transition hover:border-white/30"
+                      className="rounded-2xl border border-[#ff2e49]/20 bg-[rgba(255,255,255,0.03)] p-5 shadow-[0_0_25px_rgba(255,46,73,0.1)] backdrop-blur-lg transition hover:border-[#ffd166] hover:shadow-[0_0_35px_rgba(255,209,102,0.25)]"
                     >
-                      <p className="text-[0.65rem] uppercase tracking-[0.4em] text-white/50">
+                      <p className="text-[0.55rem] font-heading uppercase tracking-[0.35em] text-[#ffd6a3]/80 neon-text-yellow">
                         {stat.label}
                       </p>
-                      <p className="mt-3 text-2xl text-white">{stat.value}</p>
-                      <p className="mt-1 text-sm text-white/60">
+                      <p className="mt-3 font-heading text-3xl text-[#fff3d6] tracking-[0.18em] neon-text-amber">
+                        {stat.value}
+                      </p>
+                      <p className="mt-1 text-sm text-[#ffe6ba]/80 font-body">
                         {stat.href ? (
                           <a
                             href={stat.href}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-[#ffea00] underline decoration-dotted hover:text-white"
+                            className="text-[#ffd166] underline decoration-dotted hover:text-white"
                           >
                             {stat.helper}
                           </a>
@@ -492,9 +497,9 @@ function HomeContent() {
               </div>
 
               <div className="space-y-6">
-                <div className="rounded-3xl border border-white/15 bg-gradient-to-br from-white/10 via-transparent to-transparent p-6 shadow-[0_0_40px_rgba(255,0,204,0.15)]">
-                  <div className="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-white/60">
-                    <span>Flow Timeline</span>
+                <div className="rounded-3xl border border-[#ff2e4925] bg-gradient-to-br from-[#150104]/35 via-[#090006]/45 to-[#05000a]/60 p-6 shadow-[0_0_50px_rgba(255,46,73,0.25)]">
+                  <div className="flex items-center justify-between text-[0.55rem] font-heading uppercase tracking-[0.3em] text-[#ffd6a3]/80">
+                    <span>Torii Flow Timeline</span>
                     <span>
                       Step {activeTimelineStep + 1}/{TIMELINE_STEPS.length}
                     </span>
@@ -512,28 +517,28 @@ function HomeContent() {
                           onFocus={() => setActiveTimelineStep(index)}
                           className={`group relative w-full overflow-hidden rounded-2xl border px-5 py-4 text-left transition-all ${
                             isActive
-                              ? "border-[#ffea00] bg-white/10 shadow-[0_0_30px_rgba(255,234,0,0.25)]"
-                              : "border-white/10 bg-white/[0.03] hover:border-white/30"
+                              ? "border-[#ffd166] bg-[#ffd16622] shadow-[0_0_45px_rgba(255,209,102,0.25)]"
+                              : "border-[#ff2e4922] bg-[#0a0004]/70 hover:border-[#ff2e49]"
                           }`}
                         >
                           <div
-                            className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-50"
+                            className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-70"
                             style={{ background: step.accent }}
                             aria-hidden
                           />
                           <div className="relative flex items-center gap-4">
                             <div>
-                              <p className="text-[0.6rem] uppercase tracking-[0.4em] text-white/50">
+                              <p className="text-[0.55rem] uppercase tracking-[0.3em] text-[#ffd6a3]/60">
                                 Step {index + 1}
                               </p>
-                              <p className="text-2xl text-white">
+                              <p className="text-2xl font-heading text-[#fff6d8] tracking-[0.25em]">
                                 {step.title}
                               </p>
-                              <p className="text-sm text-white/60">
+                              <p className="text-sm text-white/70 font-body">
                                 {step.caption}
                               </p>
                             </div>
-                            <span className="ml-auto text-3xl">
+                            <span className="ml-auto text-3xl text-[#ffd166]">
                               {step.emoji}
                             </span>
                           </div>
@@ -542,23 +547,23 @@ function HomeContent() {
                     })}
                   </div>
 
-                  <div className="mt-6 rounded-2xl border border-white/10 bg-black/40 p-4">
-                    <p className="text-[0.6rem] uppercase tracking-[0.4em] text-white/50">
+                  <div className="mt-6 rounded-2xl border border-[#ff2e4922] bg-[#090105]/80 p-4">
+                    <p className="text-[0.55rem] uppercase tracking-[0.35em] text-[#ffd6a3]/70">
                       Now Focused
                     </p>
-                    <p className="mt-3 text-lg text-white/80">
+                    <p className="mt-3 text-lg text-[#ffe5bd]/85 font-body">
                       {timelineActive.description}
                     </p>
                   </div>
                 </div>
 
-                <div className="rounded-3xl border border-white/15 bg-black/40/80 p-6">
-                  <p className="text-[0.6rem] uppercase tracking-[0.4em] text-white/50">
-                    Status Feed
+                <div className="rounded-3xl border border-[#ff2e4933] bg-[#0a0004]/75 p-6">
+                  <p className="text-[0.55rem] uppercase tracking-[0.35em] text-[#ffd6a3]/70">
+                    Torii Status Feed
                   </p>
-                  <ul className="mt-4 space-y-3 text-sm text-white/70">
+                  <ul className="mt-4 space-y-3 text-sm text-[#ffe9c2]/80 font-body">
                     <li className="flex items-center justify-between gap-4">
-                      <span>Wallet</span>
+                      <span>Wallet Sync</span>
                       <span>
                         {wallet.publicKey
                           ? `${wallet.publicKey
@@ -638,18 +643,22 @@ function HomeContent() {
         </section>
 
         <section className="container px-4">
-          <div className="rounded-[32px] border border-white/10 bg-gradient-to-br from-white/10 via-transparent to-transparent p-6 sm:p-10">
+          <div className="rounded-[32px] border border-[#ff2e4933] bg-gradient-to-br from-[#150105]/75 via-[#070003]/85 to-[#020006]/90 p-6 sm:p-10 shadow-[0_0_70px_rgba(40,0,10,0.7)] backdrop-blur-lg">
             <div className="grid gap-6 md:grid-cols-3">
               {experiencePanels.map((panel) => (
                 <div
                   key={panel.title}
-                  className="rounded-3xl border border-white/10 bg-black/30 p-6 shadow-[0_20px_50px_rgba(0,0,0,0.35)]"
+                  className="rounded-3xl border border-[#ff2e4933] bg-[#070003]/85 p-6 shadow-[0_20px_50px_rgba(80,0,15,0.45)] transition hover:border-[#ffd166]/80"
                 >
-                  <p className="text-[0.6rem] uppercase tracking-[0.4em] text-white/50">
+                  <p className="text-[0.55rem] font-heading uppercase tracking-[0.35em] text-[#ffd6a3]/80">
                     {panel.title}
                   </p>
-                  <p className="mt-4 text-4xl text-white">{panel.metric}</p>
-                  <p className="mt-3 text-sm text-white/70">{panel.body}</p>
+                  <p className="mt-4 font-heading text-4xl text-[#fff3d6] tracking-[0.15em]">
+                    {panel.metric}
+                  </p>
+                  <p className="mt-3 text-sm text-[#ffe6ba]/85 font-body leading-relaxed">
+                    {panel.body}
+                  </p>
                 </div>
               ))}
             </div>
@@ -657,7 +666,31 @@ function HomeContent() {
         </section>
       </main>
 
-      <footer className="relative z-20 border-t border-white/10 bg-black/50 px-4 py-8 text-center text-sm text-white/60">
+      <section className="container relative z-20 mt-12 px-4">
+        <div className="rounded-[28px] border border-[#ffd166]/50 bg-gradient-to-r from-[#1a0204]/70 via-[#0b0004]/85 to-[#040008]/92 p-8 text-center shadow-[0_30px_90px_rgba(60,0,10,0.7)]">
+          <p className="text-[0.6rem] font-heading uppercase tracking-[0.35em] text-[#ffd6a3]/85">
+            Final Call
+          </p>
+          <h2 className="mt-4 font-heading text-4xl uppercase tracking-[0.2em] text-[#fff1ce]">
+            Forge Your Meme On-Chain
+          </h2>
+          <p className="mt-3 text-base text-[#ffe6ba]/85 font-body">
+            Prompt → Render → Mint, orchestrated in one neon control deck.
+          </p>
+          <div className="mt-6 flex flex-wrap justify-center gap-4">
+            <PixelButton onClick={scrollToGenerator}>GENERATE NOW</PixelButton>
+            <PixelButton
+              className="!bg-[rgba(30,2,4,0.85)]"
+              isWalletConnectButton={!wallet.publicKey}
+              onClick={wallet.publicKey ? checkBalance : undefined}
+            >
+              {wallet.publicKey ? "CHECK STATUS" : "SYNC WALLET"}
+            </PixelButton>
+          </div>
+        </div>
+      </section>
+
+      <footer className="relative z-20 mt-12 border-t border-[#8b5cf633] bg-[#04000c]/80 px-4 py-8 text-center text-sm text-white/60">
         StalkGen NFT · AI-powered cyberpunk meme forge on Solana.
       </footer>
     </div>

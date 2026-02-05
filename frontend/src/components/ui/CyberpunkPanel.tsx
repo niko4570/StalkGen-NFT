@@ -12,99 +12,49 @@ export function CyberpunkPanel({
   className = "",
 }: CyberpunkPanelProps) {
   return (
-    <div
+    <section
       className={`
         cyberpunk-panel
-        relative w-full
-        bg-gradient-to-br from-[rgba(26,13,46,0.45)] via-[rgba(30,15,60,0.5)] to-[rgba(42,26,74,0.5)]
-        backdrop-blur-sm
-        transition-all duration-300 ease-out
-        hover:scale-[1.03]
+        relative w-full overflow-hidden rounded-3xl border border-[#ff2e49]/30
+        bg-gradient-to-br from-[#3b060d]/35 via-[#22030a]/40 to-[#12020a]/50
+        p-[1px]
+        transition duration-300 hover:border-[#ffd166]/60 hover:shadow-[0_0_40px_rgba(255,209,102,0.5)]
         ${className}
       `}
-      style={{
-        border: "5px solid #ffcc00",
-        boxShadow: `
-          inset 0 0 12px #ffcc00,
-          0 0 16px #ffaa00,
-          0 0 32px rgba(255,255,153,0.6)
-        `,
-        imageRendering: "pixelated",
-      }}
     >
-      {/* Animated border glow effect */}
-      <div
-        className="absolute inset-0 pointer-events-none animate-pulse"
-        style={{
-          boxShadow: `
-            inset 0 0 20px rgba(255,204,0,0.3),
-            0 0 24px rgba(255,170,0,0.4),
-            0 0 40px rgba(255,255,153,0.3)
-          `,
-        }}
-      />
+      <div className="relative h-full rounded-[calc(1.5rem-2px)] bg-[rgba(10,0,6,0.35)] backdrop-blur-xl px-6 py-6">
+        {/* HUD grid */}
+        <span className="pointer-events-none absolute inset-0 opacity-10">
+          <span className="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,rgba(255,46,73,0.16),transparent_55%)]" />
+          <span className="absolute inset-0 bg-[linear-gradient(rgba(255,209,102,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,46,73,0.03)_1px,transparent_1px)] bg-[size:80px_80px]" />
+        </span>
 
-      {/* Title Section */}
-      <div className="relative px-6 py-4 border-b-2 border-[#ffcc00]/40">
-        <h2
-          className="font-vt323 text-3xl tracking-wider uppercase text-[#ffea00]"
-          style={{
-            textShadow: `
-              0 0 8px #ffdd44,
-              0 0 16px rgba(255,255,153,0.6),
-              2px 2px 0px rgba(0,0,0,0.5)
-            `,
-            imageRendering: "pixelated",
-          }}
-        >
-          {title}
-        </h2>
-        {/* Corner decorations */}
-        <div
-          className="absolute top-2 right-2 w-3 h-3 bg-[#ffcc00]"
-          style={{
-            boxShadow: "0 0 8px #ffcc00",
-            imageRendering: "pixelated",
-          }}
-        />
-        <div
-          className="absolute bottom-2 left-2 w-3 h-3 bg-[#ffcc00]"
-          style={{
-            boxShadow: "0 0 8px #ffcc00",
-            imageRendering: "pixelated",
-          }}
-        />
+        {/* Title */}
+        <header className="relative mb-5 flex items-center justify-between border-b border-white/10 pb-4">
+          <div>
+            <p className="font-heading text-xs uppercase tracking-[0.35em] text-[#ffd6a3]/70 neon-text-yellow">
+              Module
+            </p>
+            <h2 className="font-heading text-3xl uppercase tracking-[0.25em] text-[#fff3d6] neon-text-amber">
+              {title}
+            </h2>
+          </div>
+          <div className="flex items-center gap-2 text-[0.65rem] uppercase tracking-[0.35em] text-[#ffd6a3]/70">
+            <span className="h-2 w-2 rounded-full bg-[#ffd166] shadow-[0_0_12px_#ffd166]" />
+            Active
+          </div>
+        </header>
+
+        <div className="relative">{children}</div>
+
+        {/* Corner brackets */}
+        <span className="pointer-events-none absolute inset-0 opacity-60">
+          <span className="absolute left-4 top-4 h-6 w-6 border-l border-t border-white/20" />
+          <span className="absolute right-4 top-4 h-6 w-6 border-r border-t border-white/20" />
+          <span className="absolute left-4 bottom-4 h-6 w-6 border-b border-l border-white/20" />
+          <span className="absolute right-4 bottom-4 h-6 w-6 border-b border-r border-white/20" />
+        </span>
       </div>
-
-      {/* Content Section */}
-      <div className="relative p-6">{children}</div>
-
-      {/* Bottom corner accents */}
-      <div className="absolute bottom-3 right-3 flex gap-2">
-        <div
-          className="w-2 h-2 bg-[#ffaa00] animate-pulse"
-          style={{
-            boxShadow: "0 0 6px #ffaa00",
-            imageRendering: "pixelated",
-          }}
-        />
-        <div
-          className="w-2 h-2 bg-[#ffaa00] animate-pulse"
-          style={{
-            boxShadow: "0 0 6px #ffaa00",
-            imageRendering: "pixelated",
-            animationDelay: "0.3s",
-          }}
-        />
-        <div
-          className="w-2 h-2 bg-[#ffaa00] animate-pulse"
-          style={{
-            boxShadow: "0 0 6px #ffaa00",
-            imageRendering: "pixelated",
-            animationDelay: "0.6s",
-          }}
-        />
-      </div>
-    </div>
+    </section>
   );
 }
